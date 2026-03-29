@@ -78,3 +78,59 @@ def _upsert_rows(cursor, table: str, time_col: str, location_id: int, hourly: di
     ]
     cursor.executemany(sql, rows)
     return len(rows)
+
+def _log_run(cursor, location_id, fetch_type, status, rows=0, error=None):
+    cursor.execute(
+        """INSERT INTO ingestion_log (location_id, fetch_type, status, rows_upserted, error_message)
+           VALUES (%s, %s, %s, %s, %s)""",
+        (location_id, fetch_type, status, rows, error)
+    )
+
+
+def fetch_location(location_id: int, lat: float, lon: float, fetch_type: str = "forecast"):
+    """Fetch data for one location and upsert into DB."""
+    table = "forecasts" if fetch_type == "forecast" else "actuals"
+    time_col = "forecast_time" if fetch_type == "forecast" else "observation_time"
+
+    try:
+        params = _build_params(lat, lon, fetch_type)
+        resp = requests.get(OPEN_METEO_URL, params=params, timeout=15)
+        resp.raise_for_status()
+        hourly = resp.json().get("hourly", {})
+
+        with get_conn() as conn:
+            cursor = conn.cursor()
+            n = _upsert_rows(cursor, table, time_col, location_id, hourly)
+            _log_run(cursor, location_id, fetch_type, "success", rows=n)
+            conn.commit()
+            cursor.close()
+
+        logger.info(f"[ingestion] {fetch_type} OK — location {location_id}, {n} rows")
+        return {"status": "ok", "rows": n}
+
+    except Exception as exc:
+        logger.error(f"[ingestion] {fetch_type} FAILED — location {location_id}: {exc}")
+        try:
+            with get_conn() as conn:
+                cursor = conn.cursor()
+                _log_run(cursor, location_id, fetch_type, "error", error=str(exc))
+                conn.commit()
+                cursor.close()
+        except Exception:
+            pass
+        return {"status": "error", "error": str(exc)}
+
+
+def fetch_all_locations(fetch_type: str = "forecast"):
+    """Fetch data for every location in the DB."""
+    with get_conn() as conn:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT id, lat, lon, name FROM locations")
+        locations = cursor.fetchall()
+        cursor.close()
+
+    return [
+        {"location": loc["name"],
+         **fetch_location(loc["id"], float(loc["lat"]), float(loc["lon"]), fetch_type)}
+        for loc in locations
+    ]
