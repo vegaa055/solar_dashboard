@@ -1,10 +1,8 @@
 -- =============================================================
 -- Solar Forecast Dashboard - Database Schema
 -- =============================================================
-
 CREATE DATABASE IF NOT EXISTS solar_dashboard;
 USE solar_dashboard;
-
 -- Locations we track (easily extensible)
 CREATE TABLE IF NOT EXISTS locations (
     id          INT AUTO_INCREMENT PRIMARY KEY,
@@ -15,7 +13,6 @@ CREATE TABLE IF NOT EXISTS locations (
     created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY uq_latlon (lat, lon)
 );
-
 -- Hourly forecast data fetched from Open-Meteo
 CREATE TABLE IF NOT EXISTS forecasts (
     id                  INT AUTO_INCREMENT PRIMARY KEY,
@@ -33,7 +30,6 @@ CREATE TABLE IF NOT EXISTS forecasts (
     FOREIGN KEY (location_id) REFERENCES locations(id),
     UNIQUE KEY uq_forecast (location_id, forecast_time)
 );
-
 -- Actual observed values for forecast vs actual comparison
 CREATE TABLE IF NOT EXISTS actuals (
     id                  INT AUTO_INCREMENT PRIMARY KEY,
@@ -51,3 +47,22 @@ CREATE TABLE IF NOT EXISTS actuals (
     FOREIGN KEY (location_id) REFERENCES locations(id),
     UNIQUE KEY uq_actual (location_id, observation_time)
 );
+-- Ingestion log - track every fetch attempt
+CREATE TABLE IF NOT EXISTS ingestion_log (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    location_id     INT,
+    fetch_type      ENUM('forecast', 'historical') NOT NULL,
+    status          ENUM('success', 'error') NOT NULL,
+    rows_upserted   INT DEFAULT 0,
+    error_message   TEXT,
+    ran_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (location_id) REFERENCES locations(id)
+);
+-- =============================================================
+-- Seed data - Arizona locations
+-- =============================================================
+INSERT IGNORE INTO locations (name, lat, lon, elevation) VALUES
+    ('Tucson, AZ',       32.2226,  -110.9747, 728),
+    ('Sierra Vista, AZ', 31.5455,  -110.3031, 1404),
+    ('Phoenix, AZ',      33.4484,  -112.0740, 331),
+    ('Yuma, AZ',         32.6927,  -114.6277, 43);
