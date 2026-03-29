@@ -45,6 +45,7 @@ def get_actuals_df(location_id: int, days: int = 30) -> pd.DataFrame:
     df["observation_time"] = pd.to_datetime(df["observation_time"])
     return df
 
+
 def daily_summary(df: pd.DataFrame, time_col: str) -> pd.DataFrame:
     """Aggregate hourly data to daily stats."""
     df = df.copy()
@@ -71,6 +72,7 @@ def rolling_irradiance(df: pd.DataFrame, time_col: str, window_hours: int = 6) -
         .round(2)
     )
     return df
+
 
 def irradiance_trend(df: pd.DataFrame, time_col: str):
     """Linear regression on daily peak GHI — returns slope, r², trend label."""
