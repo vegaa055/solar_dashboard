@@ -27,6 +27,7 @@ HOURLY_VARS = [
     "is_day",
 ]
 
+
 def _build_params(lat: float, lon: float, fetch_type: str) -> dict:
     """Build query params for Open-Meteo API."""
     params = {
@@ -78,6 +79,7 @@ def _upsert_rows(cursor, table: str, time_col: str, location_id: int, hourly: di
     ]
     cursor.executemany(sql, rows)
     return len(rows)
+
 
 def _log_run(cursor, location_id, fetch_type, status, rows=0, error=None):
     cursor.execute(
