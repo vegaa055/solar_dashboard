@@ -7,7 +7,7 @@ built with Python/Flask, MySQL, Pandas/NumPy/SciPy, and a vanilla JS frontend.
 
 ## Status
 
-🚧 Under active development — see branch history for build progress.
+🚧 Under active development.
 
 ## Overview
 
