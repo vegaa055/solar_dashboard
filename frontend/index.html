@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Solar Forecast Dashboard — Arizona</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <style>
+    /* ── Reset & base ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d1117;
+      --surface:   #161b22;
+      --surface2:  #1f2937;
+      --border:    #30363d;
+      --text:      #e6edf3;
+      --muted:     #8b949e;
+      --accent:    #f0a500;
+      --accent2:   #3b82f6;
+      --accent3:   #10b981;
+      --danger:    #ef4444;
+      --glow:      rgba(240, 165, 0, 0.15);
+      --radius:    10px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Segoe UI", system-ui, sans-serif;
+      font-size: 14px;
+      min-height: 100vh;
+    }
+
+    /* ── Header ───────────────────────────────────────────────── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .header-left h1 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.5px;
+    }
+
+    .header-left p {
+      color: var(--muted);
+      font-size: 0.8rem;
+      margin-top: 2px;
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    select, button {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 7px 12px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    select:hover, button:hover { border-color: var(--accent); }
+
+    button.primary {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+      font-weight: 600;
+    }
+
+    button.primary:hover { background: #d4920a; }
+
+    /* ── Status bar ───────────────────────────────────────────── */
+    #status-bar {
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      padding: 6px 28px;
+      font-size: 12px;
+      color: var(--muted);
+      display: flex;
+      gap: 20px;
+    }
+
+    #status-bar span { display: flex; align-items: center; gap: 5px; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+    .dot.green { background: var(--accent3); }
+    .dot.yellow { background: var(--accent); }
+    .dot.red { background: var(--danger); }
+
+    /* ── Layout ───────────────────────────────────────────────── */
+    main {
+      padding: 24px 28px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto auto;
+      gap: 20px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* ── Cards ────────────────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      overflow: hidden;
+    }
+
+    .card.full-width { grid-column: 1 / -1; }
+
+    .card h2 {
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card h2 .badge {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      text-transform: none;
+      letter-spacing: 0;
+      color: var(--accent);
+    }
+
+    /* ── KPI row ──────────────────────────────────────────────── */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      grid-column: 1 / -1;
+    }
+
+    .kpi {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .kpi::after {
+      content: "";
+      position: absolute;
+      top: 0; left: 0;
+      width: 3px; height: 100%;
+      background: var(--accent);
+      border-radius: 2px 0 0 2px;
+    }
+
+    .kpi.blue::after { background: var(--accent2); }
+    .kpi.green::after { background: var(--accent3); }
+    .kpi.red::after { background: var(--danger); }
+
+    .kpi-label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 6px;
+    }
+
+    .kpi-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .kpi-sub {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* ── Chart containers ─────────────────────────────────────── */
+    .chart-wrap { position: relative; height: 280px; }
+    canvas { max-width: 100%; }
+
+    /* ── Table ────────────────────────────────────────────────── */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .data-table th {
+      text-align: left;
+      padding: 8px 12px;
+      color: var(--muted);
+      font-weight: 500;
+      border-bottom: 1px solid var(--border);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .data-table td {
+      padding: 9px 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:hover td { background: var(--surface2); }
+
+    .pill {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .pill.high { background: rgba(240,165,0,0.15); color: var(--accent); }
+    .pill.med  { background: rgba(59,130,246,0.15); color: var(--accent2); }
+    .pill.low  { background: rgba(16,185,129,0.15); color: var(--accent3); }
+
+    /* ── Loading / empty states ───────────────────────────────── */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 200px;
+      color: var(--muted);
+      font-size: 13px;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .spinner {
+      width: 24px; height: 24px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Responsive ───────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      main { grid-template-columns: 1fr; }
+      .kpi-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>☀ Solar Forecast Dashboard</h1>
+    <p>Arizona — powered by Open-Meteo</p>
+  </div>
+  <div class="header-controls">
+    <select id="location-select">
+      <option value="">Loading locations...</option>
+    </select>
+    <select id="days-select">
+      <option value="3">3-day forecast</option>
+      <option value="7" selected>7-day forecast</option>
+    </select>
+    <button class="primary" onclick="refreshAll()">↻ Refresh</button>
+    <button onclick="triggerIngest()">⬇ Fetch Data</button>
+  </div>
+</header>
+
+<div id="status-bar">
+  <span><span class="dot" id="db-dot"></span> <span id="db-status">Connecting...</span></span>
+  <span id="last-updated"></span>
+</div>
+
+<main>
+
+  <!-- KPI Cards -->
+  <div class="kpi-grid" id="kpi-row">
+    <div class="kpi" id="kpi-peak">
+      <div class="kpi-label">Peak GHI Today</div>
+      <div class="kpi-value">—</div>
+      <div class="kpi-sub">W/m²</div>
+    </div>
+    <div class="kpi blue" id="kpi-avg">
+      <div class="kpi-label">Avg GHI (7-day)</div>
+      <div class="kpi-value">—</div>
+      <div class="kpi-sub">W/m²</div>
+    </div>
+    <div class="kpi green" id="kpi-temp">
+      <div class="kpi-label">Avg Temp</div>
+      <div class="kpi-value">—</div>
+      <div class="kpi-sub">°C</div>
+    </div>
+    <div class="kpi red" id="kpi-cloud">
+      <div class="kpi-label">Avg Cloud Cover</div>
+      <div class="kpi-value">—</div>
+      <div class="kpi-sub">%</div>
+    </div>
+  </div>
+
+  <!-- Hourly GHI Chart -->
+  <div class="card full-width">
+    <h2>Hourly Irradiance (GHI) <span class="badge">7-day forecast</span></h2>
+    <div class="chart-wrap">
+      <canvas id="ghi-chart"></canvas>
+    </div>
+  </div>
+
+  <!-- Daily Summary Chart -->
+  <div class="card">
+    <h2>Daily Peak GHI <span class="badge">forecast</span></h2>
+    <div class="chart-wrap">
+      <canvas id="daily-chart"></canvas>
+    </div>
+  </div>
+
+  <!-- Temperature + Cloud Cover -->
+  <div class="card">
+    <h2>Temperature & Cloud Cover <span class="badge">forecast</span></h2>
+    <div class="chart-wrap">
+      <canvas id="temp-chart"></canvas>
+    </div>
+  </div>
+
+  <!-- Daily Summary Table -->
+  <div class="card full-width">
+    <h2>7-Day Summary Table</h2>
+    <div id="table-container">
+      <div class="loading"><div class="spinner"></div><span>Loading...</span></div>
+    </div>
+  </div>
+
+</main>
+
+
+</body>
+</html>
