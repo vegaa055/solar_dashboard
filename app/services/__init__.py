@@ -1,0 +1,1 @@
+# app/__init__.py — populated in feature/flask-api
