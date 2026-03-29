@@ -71,3 +71,45 @@ def rolling_irradiance(df: pd.DataFrame, time_col: str, window_hours: int = 6) -
         .round(2)
     )
     return df
+
+def irradiance_trend(df: pd.DataFrame, time_col: str):
+    """Linear regression on daily peak GHI — returns slope, r², trend label."""
+    summary = daily_summary(df, time_col)
+    if len(summary) < 3:
+        return None
+    x = np.arange(len(summary))
+    y = summary["peak_ghi"].values
+    slope, intercept, r, p, se = linregress(x, y)
+    trend = "stable" if abs(slope) < 5 else ("increasing" if slope > 0 else "decreasing")
+    return {"slope_per_day": round(slope, 2), "r_squared": round(r ** 2, 3), "trend": trend}
+
+
+def forecast_vs_actual(location_id: int) -> dict:
+    """Compare last 7 days of forecasts vs actuals. Returns RMSE and MAE."""
+    forecast_sql = """
+        SELECT DATE(forecast_time) AS day, AVG(shortwave_radiation) AS fcst_ghi
+        FROM forecasts
+        WHERE location_id = %s AND forecast_time >= NOW() - INTERVAL 7 DAY
+        GROUP BY day
+    """
+    actual_sql = """
+        SELECT DATE(observation_time) AS day, AVG(shortwave_radiation) AS obs_ghi
+        FROM actuals
+        WHERE location_id = %s AND observation_time >= NOW() - INTERVAL 7 DAY
+        GROUP BY day
+    """
+    with get_conn() as conn:
+        f_df = pd.read_sql(forecast_sql, conn, params=(location_id,))
+        a_df = pd.read_sql(actual_sql, conn, params=(location_id,))
+
+    merged = pd.merge(f_df, a_df, on="day", how="inner")
+    if merged.empty:
+        return {"message": "Not enough overlapping data yet. Check back after a few days."}
+
+    errors = merged["fcst_ghi"] - merged["obs_ghi"]
+    return {
+        "days_compared": len(merged),
+        "rmse_wm2": float(np.sqrt((errors ** 2).mean()).round(2)),
+        "mae_wm2": float(errors.abs().mean().round(2)),
+        "daily": merged.assign(error=errors.round(2)).to_dict(orient="records"),
+    }
