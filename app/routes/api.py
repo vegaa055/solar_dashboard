@@ -36,3 +36,44 @@ def list_locations():
         rows = cursor.fetchall()
         cursor.close()
     return jsonify(rows)
+
+
+@api.route("/forecast")
+def get_forecast():
+    lid, err = _require_location_id()
+    if err:
+        return err
+    days = min(max(request.args.get("days", default=7, type=int), 1), 7)
+    df = analytics.get_forecast_df(lid, days)
+    if df.empty:
+        return jsonify({"message": "No forecast data. Trigger /api/ingest first.", "data": []})
+    df = analytics.rolling_irradiance(df, "forecast_time")
+    df["forecast_time"] = df["forecast_time"].dt.strftime("%Y-%m-%dT%H:%M")
+    return jsonify(df.to_dict(orient="records"))
+
+
+@api.route("/forecast/daily")
+def get_forecast_daily():
+    lid, err = _require_location_id()
+    if err:
+        return err
+    df = analytics.get_forecast_df(lid, days=7)
+    if df.empty:
+        return jsonify({"message": "No forecast data yet.", "data": []})
+    summary = analytics.daily_summary(df, "forecast_time")
+    summary["date"] = summary["date"].astype(str)
+    return jsonify(summary.to_dict(orient="records"))
+
+
+@api.route("/historical")
+def get_historical():
+    lid, err = _require_location_id()
+    if err:
+        return err
+    days = min(max(request.args.get("days", default=30, type=int), 1), 30)
+    df = analytics.get_actuals_df(lid, days)
+    if df.empty:
+        return jsonify({"message": "No historical data yet.", "data": []})
+    df = analytics.rolling_irradiance(df, "observation_time")
+    df["observation_time"] = df["observation_time"].dt.strftime("%Y-%m-%dT%H:%M")
+    return jsonify(df.to_dict(orient="records"))
