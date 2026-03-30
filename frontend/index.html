@@ -1,27 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Solar Forecast Dashboard — Arizona</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <style>
-    /* ── Reset & base ─────────────────────────────────────────── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     :root {
-      --bg:        #0d1117;
-      --surface:   #161b22;
-      --surface2:  #1f2937;
-      --border:    #30363d;
-      --text:      #e6edf3;
-      --muted:     #8b949e;
-      --accent:    #f0a500;
-      --accent2:   #3b82f6;
-      --accent3:   #10b981;
-      --danger:    #ef4444;
-      --glow:      rgba(240, 165, 0, 0.15);
-      --radius:    10px;
+      --bg: #0d1117;
+      --surface: #161b22;
+      --surface2: #1f2937;
+      --border: #30363d;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --accent: #f0a500;
+      --accent2: #3b82f6;
+      --accent3: #10b981;
+      --danger: #ef4444;
+      --radius: 10px;
     }
 
     body {
@@ -32,7 +37,6 @@
       min-height: 100vh;
     }
 
-    /* ── Header ───────────────────────────────────────────────── */
     header {
       background: var(--surface);
       border-bottom: 1px solid var(--border);
@@ -48,7 +52,6 @@
       font-size: 1.2rem;
       font-weight: 700;
       color: var(--accent);
-      letter-spacing: 0.5px;
     }
 
     .header-left p {
@@ -63,7 +66,8 @@
       gap: 10px;
     }
 
-    select, button {
+    select,
+    button {
       background: var(--surface2);
       color: var(--text);
       border: 1px solid var(--border);
@@ -71,10 +75,13 @@
       padding: 7px 12px;
       font-size: 13px;
       cursor: pointer;
-      transition: border-color 0.2s, background 0.2s;
+      transition: border-color 0.2s;
     }
 
-    select:hover, button:hover { border-color: var(--accent); }
+    select:hover,
+    button:hover {
+      border-color: var(--accent);
+    }
 
     button.primary {
       background: var(--accent);
@@ -83,9 +90,10 @@
       font-weight: 600;
     }
 
-    button.primary:hover { background: #d4920a; }
+    button.primary:hover {
+      background: #d4920a;
+    }
 
-    /* ── Status bar ───────────────────────────────────────────── */
     #status-bar {
       background: var(--surface2);
       border-bottom: 1px solid var(--border);
@@ -96,24 +104,40 @@
       gap: 20px;
     }
 
-    #status-bar span { display: flex; align-items: center; gap: 5px; }
-    .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
-    .dot.green { background: var(--accent3); }
-    .dot.yellow { background: var(--accent); }
-    .dot.red { background: var(--danger); }
+    #status-bar span {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
 
-    /* ── Layout ───────────────────────────────────────────────── */
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .dot.green {
+      background: var(--accent3);
+    }
+
+    .dot.yellow {
+      background: var(--accent);
+    }
+
+    .dot.red {
+      background: var(--danger);
+    }
+
     main {
       padding: 24px 28px;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      grid-template-rows: auto auto auto;
       gap: 20px;
       max-width: 1400px;
       margin: 0 auto;
     }
 
-    /* ── Cards ────────────────────────────────────────────────── */
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -122,7 +146,9 @@
       overflow: hidden;
     }
 
-    .card.full-width { grid-column: 1 / -1; }
+    .card.full-width {
+      grid-column: 1 / -1;
+    }
 
     .card h2 {
       font-size: 0.85rem;
@@ -147,7 +173,6 @@
       color: var(--accent);
     }
 
-    /* ── KPI row ──────────────────────────────────────────────── */
     .kpi-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -167,15 +192,25 @@
     .kpi::after {
       content: "";
       position: absolute;
-      top: 0; left: 0;
-      width: 3px; height: 100%;
+      top: 0;
+      left: 0;
+      width: 3px;
+      height: 100%;
       background: var(--accent);
       border-radius: 2px 0 0 2px;
     }
 
-    .kpi.blue::after { background: var(--accent2); }
-    .kpi.green::after { background: var(--accent3); }
-    .kpi.red::after { background: var(--danger); }
+    .kpi.blue::after {
+      background: var(--accent2);
+    }
+
+    .kpi.green::after {
+      background: var(--accent3);
+    }
+
+    .kpi.red::after {
+      background: var(--danger);
+    }
 
     .kpi-label {
       font-size: 11px;
@@ -198,11 +233,11 @@
       margin-top: 4px;
     }
 
-    /* ── Chart containers ─────────────────────────────────────── */
-    .chart-wrap { position: relative; height: 280px; }
-    canvas { max-width: 100%; }
+    .chart-wrap {
+      position: relative;
+      height: 280px;
+    }
 
-    /* ── Table ────────────────────────────────────────────────── */
     .data-table {
       width: 100%;
       border-collapse: collapse;
@@ -223,11 +258,15 @@
     .data-table td {
       padding: 9px 12px;
       border-bottom: 1px solid var(--border);
-      color: var(--text);
     }
 
-    .data-table tr:last-child td { border-bottom: none; }
-    .data-table tr:hover td { background: var(--surface2); }
+    .data-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .data-table tr:hover td {
+      background: var(--surface2);
+    }
 
     .pill {
       display: inline-block;
@@ -237,11 +276,21 @@
       font-weight: 600;
     }
 
-    .pill.high { background: rgba(240,165,0,0.15); color: var(--accent); }
-    .pill.med  { background: rgba(59,130,246,0.15); color: var(--accent2); }
-    .pill.low  { background: rgba(16,185,129,0.15); color: var(--accent3); }
+    .pill.high {
+      background: rgba(240, 165, 0, 0.15);
+      color: var(--accent);
+    }
 
-    /* ── Loading / empty states ───────────────────────────────── */
+    .pill.med {
+      background: rgba(59, 130, 246, 0.15);
+      color: var(--accent2);
+    }
+
+    .pill.low {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--accent3);
+    }
+
     .loading {
       display: flex;
       align-items: center;
@@ -254,107 +303,233 @@
     }
 
     .spinner {
-      width: 24px; height: 24px;
+      width: 24px;
+      height: 24px;
       border: 2px solid var(--border);
       border-top-color: var(--accent);
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
     }
 
-    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
 
-    /* ── Responsive ───────────────────────────────────────────── */
     @media (max-width: 768px) {
-      main { grid-template-columns: 1fr; }
-      .kpi-grid { grid-template-columns: 1fr 1fr; }
+      main {
+        grid-template-columns: 1fr;
+      }
+
+      .kpi-grid {
+        grid-template-columns: 1fr 1fr;
+      }
     }
   </style>
 </head>
+
 <body>
-
-<header>
-  <div class="header-left">
-    <h1>☀ Solar Forecast Dashboard</h1>
-    <p>Arizona — powered by Open-Meteo</p>
+  <header>
+    <div class="header-left">
+      <h1>☀ Solar Forecast Dashboard</h1>
+      <p>Arizona — powered by Open-Meteo</p>
+    </div>
+    <div class="header-controls">
+      <select id="location-select">
+        <option value="">Loading...</option>
+      </select>
+      <select id="days-select">
+        <option value="3">3-day forecast</option>
+        <option value="7" selected>7-day forecast</option>
+      </select>
+      <button class="primary" onclick="refreshAll()">↻ Refresh</button>
+      <button onclick="triggerIngest()">⬇ Fetch Data</button>
+    </div>
+  </header>
+  <div id="status-bar">
+    <span><span class="dot" id="db-dot"></span> <span id="db-status">Connecting...</span></span>
+    <span id="last-updated"></span>
   </div>
-  <div class="header-controls">
-    <select id="location-select">
-      <option value="">Loading locations...</option>
-    </select>
-    <select id="days-select">
-      <option value="3">3-day forecast</option>
-      <option value="7" selected>7-day forecast</option>
-    </select>
-    <button class="primary" onclick="refreshAll()">↻ Refresh</button>
-    <button onclick="triggerIngest()">⬇ Fetch Data</button>
-  </div>
-</header>
-
-<div id="status-bar">
-  <span><span class="dot" id="db-dot"></span> <span id="db-status">Connecting...</span></span>
-  <span id="last-updated"></span>
-</div>
-
-<main>
-
-  <!-- KPI Cards -->
-  <div class="kpi-grid" id="kpi-row">
-    <div class="kpi" id="kpi-peak">
-      <div class="kpi-label">Peak GHI Today</div>
-      <div class="kpi-value">—</div>
-      <div class="kpi-sub">W/m²</div>
+  <main>
+    <div class="kpi-grid">
+      <div class="kpi" id="kpi-peak">
+        <div class="kpi-label">Peak GHI Today</div>
+        <div class="kpi-value">—</div>
+        <div class="kpi-sub">W/m²</div>
+      </div>
+      <div class="kpi blue" id="kpi-avg">
+        <div class="kpi-label">Avg GHI (7-day)</div>
+        <div class="kpi-value">—</div>
+        <div class="kpi-sub">W/m²</div>
+      </div>
+      <div class="kpi green" id="kpi-temp">
+        <div class="kpi-label">Avg Temp</div>
+        <div class="kpi-value">—</div>
+        <div class="kpi-sub">°C</div>
+      </div>
+      <div class="kpi red" id="kpi-cloud">
+        <div class="kpi-label">Avg Cloud Cover</div>
+        <div class="kpi-value">—</div>
+        <div class="kpi-sub">%</div>
+      </div>
     </div>
-    <div class="kpi blue" id="kpi-avg">
-      <div class="kpi-label">Avg GHI (7-day)</div>
-      <div class="kpi-value">—</div>
-      <div class="kpi-sub">W/m²</div>
+    <div class="card full-width">
+      <h2>Hourly Irradiance (GHI) <span class="badge">7-day forecast</span></h2>
+      <div class="chart-wrap"><canvas id="ghi-chart"></canvas></div>
     </div>
-    <div class="kpi green" id="kpi-temp">
-      <div class="kpi-label">Avg Temp</div>
-      <div class="kpi-value">—</div>
-      <div class="kpi-sub">°C</div>
+    <div class="card">
+      <h2>Daily Peak GHI <span class="badge">forecast</span></h2>
+      <div class="chart-wrap"><canvas id="daily-chart"></canvas></div>
     </div>
-    <div class="kpi red" id="kpi-cloud">
-      <div class="kpi-label">Avg Cloud Cover</div>
-      <div class="kpi-value">—</div>
-      <div class="kpi-sub">%</div>
+    <div class="card">
+      <h2>Temperature & Cloud Cover <span class="badge">forecast</span></h2>
+      <div class="chart-wrap"><canvas id="temp-chart"></canvas></div>
     </div>
-  </div>
-
-  <!-- Hourly GHI Chart -->
-  <div class="card full-width">
-    <h2>Hourly Irradiance (GHI) <span class="badge">7-day forecast</span></h2>
-    <div class="chart-wrap">
-      <canvas id="ghi-chart"></canvas>
+    <div class="card full-width">
+      <h2>7-Day Summary Table</h2>
+      <div id="table-container">
+        <div class="loading">
+          <div class="spinner"></div><span>Loading...</span>
+        </div>
+      </div>
     </div>
-  </div>
+  </main>
+  <script>
+    const API = "";
+    let ghiChart = null, dailyChart = null, tempChart = null;
+    Chart.defaults.color = "#8b949e";
+    Chart.defaults.borderColor = "#30363d";
+    Chart.defaults.font.family = "'Segoe UI', system-ui, sans-serif";
+    Chart.defaults.font.size = 12;
 
-  <!-- Daily Summary Chart -->
-  <div class="card">
-    <h2>Daily Peak GHI <span class="badge">forecast</span></h2>
-    <div class="chart-wrap">
-      <canvas id="daily-chart"></canvas>
-    </div>
-  </div>
+    async function apiFetch(path) {
+      const resp = await fetch(API + path);
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      return resp.json();
+    }
 
-  <!-- Temperature + Cloud Cover -->
-  <div class="card">
-    <h2>Temperature & Cloud Cover <span class="badge">forecast</span></h2>
-    <div class="chart-wrap">
-      <canvas id="temp-chart"></canvas>
-    </div>
-  </div>
+    function setStatus(ok, msg) {
+      document.getElementById("db-dot").className = "dot " + (ok ? "green" : "red");
+      document.getElementById("db-status").textContent = msg;
+    }
 
-  <!-- Daily Summary Table -->
-  <div class="card full-width">
-    <h2>7-Day Summary Table</h2>
-    <div id="table-container">
-      <div class="loading"><div class="spinner"></div><span>Loading...</span></div>
-    </div>
-  </div>
+    function setKPI(id, value, decimals = 0) {
+      const el = document.querySelector(`#${id} .kpi-value`);
+      if (el) el.textContent = value != null ? Number(value).toFixed(decimals) : "—";
+    }
 
-</main>
+    function ghiPill(val) {
+      if (val > 600) return `<span class="pill high">${val.toFixed(0)}</span>`;
+      if (val > 300) return `<span class="pill med">${val.toFixed(0)}</span>`;
+      return `<span class="pill low">${val.toFixed(0)}</span>`;
+    }
 
+    async function loadLocations() {
+      try {
+        const locs = await apiFetch("/api/locations");
+        const sel = document.getElementById("location-select");
+        sel.innerHTML = locs.map(l => `<option value="${l.id}">${l.name}</option>`).join("");
+        if (locs.length > 0) refreshAll();
+        setStatus(true, "Connected");
+      } catch (e) {
+        setStatus(false, "Cannot reach API — is Flask running?");
+        document.getElementById("location-select").innerHTML = `<option>API unavailable</option>`;
+      }
+    }
 
+    async function refreshAll() {
+      const locationId = document.getElementById("location-select").value;
+      const days = document.getElementById("days-select").value;
+      document.getElementById("last-updated").textContent = "Updated " + new Date().toLocaleTimeString();
+      try {
+        const [hourly, daily] = await Promise.all([
+          apiFetch(`/api/forecast?location_id=${locationId}&days=${days}`),
+          apiFetch(`/api/forecast/daily?location_id=${locationId}`)
+        ]);
+        if (Array.isArray(hourly) && hourly.length) { renderGHIChart(hourly); renderTempChart(hourly); }
+        if (Array.isArray(daily) && daily.length) { renderDailyChart(daily); renderTable(daily); updateKPIs(daily); }
+        else document.getElementById("table-container").innerHTML = `<div class="loading"><span>No data yet. Click "Fetch Data".</span></div>`;
+      } catch (e) { setStatus(false, "Error: " + e.message); }
+    }
+
+    function updateKPIs(daily) {
+      const today = daily[0];
+      if (today) { setKPI("kpi-peak", today.peak_ghi); setKPI("kpi-cloud", today.avg_cloud); setKPI("kpi-temp", today.avg_temp, 1); }
+      setKPI("kpi-avg", (daily.reduce((s, d) => s + (d.avg_ghi || 0), 0) / daily.length));
+    }
+
+    function renderGHIChart(data) {
+      const ctx = document.getElementById("ghi-chart").getContext("2d");
+      if (ghiChart) ghiChart.destroy();
+      ghiChart = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: data.map(d => d.forecast_time.slice(11, 16)),
+          datasets: [
+            { label: "GHI (W/m²)", data: data.map(d => d.shortwave_radiation || 0), borderColor: "rgba(240,165,0,0.5)", backgroundColor: "rgba(240,165,0,0.05)", borderWidth: 1, pointRadius: 0, fill: true, tension: 0.3 },
+            { label: "6-hr Rolling Avg", data: data.map(d => d.ghi_rolling || 0), borderColor: "#f0a500", borderWidth: 2.5, pointRadius: 0, fill: false, tension: 0.4 }
+          ]
+        },
+        options: { responsive: true, maintainAspectRatio: false, interaction: { mode: "index", intersect: false }, plugins: { legend: { position: "top" } }, scales: { x: { ticks: { maxTicksLimit: 14, maxRotation: 0 } }, y: { title: { display: true, text: "W/m²" }, beginAtZero: true } } }
+      });
+    }
+
+    function renderDailyChart(data) {
+      const ctx = document.getElementById("daily-chart").getContext("2d");
+      if (dailyChart) dailyChart.destroy();
+      dailyChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: data.map(d => d.date),
+          datasets: [{ label: "Peak GHI (W/m²)", data: data.map(d => d.peak_ghi), backgroundColor: data.map(d => d.peak_ghi > 700 ? "rgba(240,165,0,0.8)" : d.peak_ghi > 400 ? "rgba(59,130,246,0.7)" : "rgba(16,185,129,0.6)"), borderRadius: 5, borderSkipped: false }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, title: { display: true, text: "W/m²" } } } }
+      });
+    }
+
+    function renderTempChart(data) {
+      const sampled = data.filter((_, i) => i % 3 === 0);
+      const ctx = document.getElementById("temp-chart").getContext("2d");
+      if (tempChart) tempChart.destroy();
+      tempChart = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: sampled.map(d => d.forecast_time.slice(5, 13)),
+          datasets: [
+            { label: "Temp (°C)", data: sampled.map(d => d.temperature_2m), borderColor: "#ef4444", backgroundColor: "rgba(239,68,68,0.08)", borderWidth: 2, pointRadius: 0, fill: true, tension: 0.4, yAxisID: "y" },
+            { label: "Cloud Cover (%)", data: sampled.map(d => d.cloud_cover), borderColor: "#3b82f6", backgroundColor: "rgba(59,130,246,0.08)", borderWidth: 2, pointRadius: 0, fill: true, tension: 0.4, yAxisID: "y1" }
+          ]
+        },
+        options: { responsive: true, maintainAspectRatio: false, interaction: { mode: "index", intersect: false }, plugins: { legend: { position: "top" } }, scales: { y: { title: { display: true, text: "°C" } }, y1: { position: "right", title: { display: true, text: "%" }, min: 0, max: 100, grid: { drawOnChartArea: false } } } }
+      });
+    }
+
+    function renderTable(data) {
+      document.getElementById("table-container").innerHTML = `
+    <table class="data-table">
+      <thead><tr><th>Date</th><th>Peak GHI (W/m²)</th><th>Avg GHI (W/m²)</th><th>Avg Temp (°C)</th><th>Avg Cloud</th><th>Precip (mm)</th></tr></thead>
+      <tbody>${data.map(d => `<tr><td>${d.date}</td><td>${ghiPill(d.peak_ghi)}</td><td>${d.avg_ghi.toFixed(0)}</td><td>${d.avg_temp.toFixed(1)}</td><td>${d.avg_cloud.toFixed(0)}%</td><td>${d.total_precip.toFixed(1)}</td></tr>`).join("")}</tbody>
+    </table>`;
+    }
+
+    async function triggerIngest() {
+      const btn = event.target;
+      btn.disabled = true; btn.textContent = "Fetching...";
+      setStatus(true, "Fetching from Open-Meteo...");
+      try {
+        await fetch(API + "/api/ingest?fetch_type=forecast", { method: "POST" });
+        await fetch(API + "/api/ingest?fetch_type=historical", { method: "POST" });
+        setStatus(true, "Fetch complete");
+        await refreshAll();
+      } catch (e) { setStatus(false, "Fetch failed: " + e.message); }
+      finally { btn.disabled = false; btn.textContent = "⬇ Fetch Data"; }
+    }
+
+    document.getElementById("location-select").addEventListener("change", refreshAll);
+    document.getElementById("days-select").addEventListener("change", refreshAll);
+    loadLocations();
+  </script>
 </body>
+
 </html>
