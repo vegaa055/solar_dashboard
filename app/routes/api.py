@@ -78,6 +78,7 @@ def get_historical():
     df["observation_time"] = df["observation_time"].dt.strftime("%Y-%m-%dT%H:%M")
     return jsonify(df.to_dict(orient="records"))
 
+
 @api.route("/compare")
 def compare():
     lid, err = _require_location_id()
