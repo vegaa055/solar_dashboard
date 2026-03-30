@@ -1,6 +1,7 @@
 """
 app/db.py
-Thin database connection layer using a connection pool.
+Thin database connection layer.
+Returns a mysql-connector connection from env config.
 """
 import os
 import mysql.connector
@@ -26,5 +27,5 @@ def get_pool():
 
 
 def get_conn():
-    """Get a connection from the pool."""
+    """Get a connection from the pool. Use as a context manager."""
     return get_pool().get_connection()

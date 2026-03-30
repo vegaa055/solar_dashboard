@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 OPEN_METEO_URL = "https://api.open-meteo.com/v1/forecast"
 
+# Fields we care about — maps Open-Meteo variable name -> our DB column
 HOURLY_VARS = [
     "temperature_2m",
     "precipitation",
@@ -34,12 +35,13 @@ def _build_params(lat: float, lon: float, fetch_type: str) -> dict:
         "latitude": lat,
         "longitude": lon,
         "hourly": ",".join(HOURLY_VARS),
-        "timezone": "America/Phoenix",
+        "timezone": "America/Phoenix",  # AZ doesn't do DST — keeps things clean
         "wind_speed_unit": "kmh",
     }
     if fetch_type == "forecast":
         params["forecast_days"] = 7
     else:
+        # Past 30 days of actuals
         end = datetime.now(timezone.utc).date()
         start = end - timedelta(days=30)
         params["start_date"] = str(start)
@@ -48,14 +50,16 @@ def _build_params(lat: float, lon: float, fetch_type: str) -> dict:
 
 
 def _upsert_rows(cursor, table: str, time_col: str, location_id: int, hourly: dict):
-    """Insert or update rows. ON DUPLICATE KEY UPDATE makes this idempotent."""
+    """Insert or update rows. Uses ON DUPLICATE KEY UPDATE for idempotency."""
     times = hourly["time"]
+    n = len(times)
 
     sql = f"""
         INSERT INTO {table}
             (location_id, {time_col}, temperature_2m, precipitation, cloud_cover,
              wind_speed_10m, shortwave_radiation, direct_radiation, diffuse_radiation, is_day)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        VALUES
+            (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         ON DUPLICATE KEY UPDATE
             temperature_2m      = VALUES(temperature_2m),
             precipitation       = VALUES(precipitation),
@@ -67,18 +71,23 @@ def _upsert_rows(cursor, table: str, time_col: str, location_id: int, hourly: di
             is_day              = VALUES(is_day)
     """
 
-    rows = [
-        (
-            location_id, times[i],
-            hourly["temperature_2m"][i], hourly["precipitation"][i],
-            hourly["cloud_cover"][i], hourly["wind_speed_10m"][i],
-            hourly["shortwave_radiation"][i], hourly["direct_radiation"][i],
-            hourly["diffuse_radiation"][i], hourly["is_day"][i],
-        )
-        for i in range(len(times))
-    ]
+    rows = []
+    for i in range(n):
+        rows.append((
+            location_id,
+            times[i],
+            hourly["temperature_2m"][i],
+            hourly["precipitation"][i],
+            hourly["cloud_cover"][i],
+            hourly["wind_speed_10m"][i],
+            hourly["shortwave_radiation"][i],
+            hourly["direct_radiation"][i],
+            hourly["diffuse_radiation"][i],
+            hourly["is_day"][i],
+        ))
+
     cursor.executemany(sql, rows)
-    return len(rows)
+    return n
 
 
 def _log_run(cursor, location_id, fetch_type, status, rows=0, error=None):
@@ -90,7 +99,10 @@ def _log_run(cursor, location_id, fetch_type, status, rows=0, error=None):
 
 
 def fetch_location(location_id: int, lat: float, lon: float, fetch_type: str = "forecast"):
-    """Fetch data for one location and upsert into DB."""
+    """
+    Fetch data for one location and upsert into DB.
+    fetch_type: 'forecast' or 'historical'
+    """
     table = "forecasts" if fetch_type == "forecast" else "actuals"
     time_col = "forecast_time" if fetch_type == "forecast" else "observation_time"
 
@@ -98,7 +110,8 @@ def fetch_location(location_id: int, lat: float, lon: float, fetch_type: str = "
         params = _build_params(lat, lon, fetch_type)
         resp = requests.get(OPEN_METEO_URL, params=params, timeout=15)
         resp.raise_for_status()
-        hourly = resp.json().get("hourly", {})
+        data = resp.json()
+        hourly = data.get("hourly", {})
 
         with get_conn() as conn:
             cursor = conn.cursor()
@@ -125,14 +138,16 @@ def fetch_location(location_id: int, lat: float, lon: float, fetch_type: str = "
 
 def fetch_all_locations(fetch_type: str = "forecast"):
     """Fetch data for every location in the DB."""
+    results = []
     with get_conn() as conn:
         cursor = conn.cursor(dictionary=True)
         cursor.execute("SELECT id, lat, lon, name FROM locations")
         locations = cursor.fetchall()
         cursor.close()
 
-    return [
-        {"location": loc["name"],
-         **fetch_location(loc["id"], float(loc["lat"]), float(loc["lon"]), fetch_type)}
-        for loc in locations
-    ]
+    for loc in locations:
+        logger.info(f"[ingestion] Fetching {fetch_type} for {loc['name']}")
+        result = fetch_location(loc["id"], float(loc["lat"]), float(loc["lon"]), fetch_type)
+        results.append({"location": loc["name"], **result})
+
+    return results

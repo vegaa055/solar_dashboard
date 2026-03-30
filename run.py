@@ -1,4 +1,7 @@
-"""run.py — Development entry point."""
+"""
+run.py - Entry point for development server.
+Production: use gunicorn (see docker-compose.yml)
+"""
 import os
 from app import create_app
 

@@ -13,11 +13,11 @@ services:
       MYSQL_PASSWORD: changeme
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql  # auto-runs on first start
     ports:
       - "3307:3306"
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "solar_user", "-pchangeme" ]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "solar_user", "-pchangeme"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -41,7 +41,7 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - .:/app
+      - .:/app  # live reload during development
 
 volumes:
   mysql_data:
