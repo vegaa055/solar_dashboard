@@ -1,8 +1,10 @@
 -- =============================================================
 -- Solar Forecast Dashboard - Database Schema
 -- =============================================================
+
 CREATE DATABASE IF NOT EXISTS solar_dashboard;
 USE solar_dashboard;
+
 -- Locations we track (easily extensible)
 CREATE TABLE IF NOT EXISTS locations (
     id          INT AUTO_INCREMENT PRIMARY KEY,
@@ -13,24 +15,26 @@ CREATE TABLE IF NOT EXISTS locations (
     created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY uq_latlon (lat, lon)
 );
+
 -- Hourly forecast data fetched from Open-Meteo
 CREATE TABLE IF NOT EXISTS forecasts (
     id                  INT AUTO_INCREMENT PRIMARY KEY,
     location_id         INT NOT NULL,
-    forecast_time       DATETIME NOT NULL,
-    fetched_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    temperature_2m      DECIMAL(5,2),
-    precipitation       DECIMAL(6,2),
-    cloud_cover         TINYINT UNSIGNED,
-    wind_speed_10m      DECIMAL(6,2),
-    shortwave_radiation DECIMAL(8,2),    -- W/m² GHI
-    direct_radiation    DECIMAL(8,2),    -- W/m² DNI proxy
-    diffuse_radiation   DECIMAL(8,2),    -- W/m² DHI
-    is_day              TINYINT(1),
+    forecast_time       DATETIME NOT NULL,       -- the hour this forecast is for
+    fetched_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- when we pulled it
+    temperature_2m      DECIMAL(5,2),            -- °C
+    precipitation       DECIMAL(6,2),            -- mm
+    cloud_cover         TINYINT UNSIGNED,        -- %
+    wind_speed_10m      DECIMAL(6,2),            -- km/h
+    shortwave_radiation DECIMAL(8,2),            -- W/m² (GHI - global horizontal irradiance)
+    direct_radiation    DECIMAL(8,2),            -- W/m² (DNI proxy)
+    diffuse_radiation   DECIMAL(8,2),            -- W/m² (DHI)
+    is_day              TINYINT(1),              -- 1 = daylight hours
     FOREIGN KEY (location_id) REFERENCES locations(id),
-    UNIQUE KEY uq_forecast (location_id, forecast_time)
+    UNIQUE KEY uq_forecast (location_id, forecast_time)  -- upsert-safe
 );
--- Actual observed values for forecast vs actual comparison
+
+-- Actual observed values (same fields, separate table for clean forecast vs actual comparison)
 CREATE TABLE IF NOT EXISTS actuals (
     id                  INT AUTO_INCREMENT PRIMARY KEY,
     location_id         INT NOT NULL,
@@ -47,7 +51,8 @@ CREATE TABLE IF NOT EXISTS actuals (
     FOREIGN KEY (location_id) REFERENCES locations(id),
     UNIQUE KEY uq_actual (location_id, observation_time)
 );
--- Ingestion log - track every fetch attempt
+
+-- Ingestion log - track every fetch attempt (good ops practice)
 CREATE TABLE IF NOT EXISTS ingestion_log (
     id              INT AUTO_INCREMENT PRIMARY KEY,
     location_id     INT,
@@ -58,6 +63,7 @@ CREATE TABLE IF NOT EXISTS ingestion_log (
     ran_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (location_id) REFERENCES locations(id)
 );
+
 -- =============================================================
 -- Seed data - Arizona locations
 -- =============================================================
