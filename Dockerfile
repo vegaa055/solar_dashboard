@@ -15,6 +15,7 @@ CMD ["python", "run.py"]
 # ── production: gunicorn, no debug ───────────────────────────────────────────
 FROM base AS production
 COPY requirements.txt .
+RUN apt-get update && apt-get install -y default-mysql-client && rm -rf /var/lib/apt/lists/*
 RUN pip install --no-cache-dir -r requirements.txt gunicorn
 COPY . .
 EXPOSE 5000
