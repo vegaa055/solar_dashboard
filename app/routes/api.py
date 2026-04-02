@@ -105,19 +105,6 @@ def get_historical():
     return jsonify(df.to_dict(orient="records"))
 
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> api
-# ------------------------------------------------------------------
-# Comparison & Trend
-# ------------------------------------------------------------------
-
-<<<<<<< HEAD
-=======
-=======
->>>>>>> c6a60c353a8e7b2f44847ab8342dacb2ac90caf3
->>>>>>> api
 @api.route("/compare")
 def compare():
     lid, err = _require_location_id()
