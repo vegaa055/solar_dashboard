@@ -44,4 +44,8 @@ services:
       - .:/app  # live reload during development
 
 volumes:
+<<<<<<< HEAD
   mysql_data:
+=======
+  mysql_data:
+>>>>>>> api
