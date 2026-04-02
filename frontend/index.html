@@ -311,6 +311,16 @@
       color: var(--accent3);
     }
 
+    .button-container {
+      display: flex;
+      flex-direction: row;
+      /* Default side-by-side */
+      gap: 16px;
+      /* Spacing between buttons */
+      justify-content: center;
+      /* Center them horizontally */
+    }
+
     /* ── Loading / empty states ───────────────────────────────── */
     .loading {
       display: flex;
@@ -347,6 +357,12 @@
       .kpi-grid {
         grid-template-columns: 1fr 1fr;
       }
+
+      .button-container {
+        flex-direction: column;
+        align-items: stretch;
+        /* Optional: Makes buttons full-width on mobile */
+      }
     }
   </style>
 </head>
@@ -366,8 +382,10 @@
         <option value="3">3-day forecast</option>
         <option value="7" selected>7-day forecast</option>
       </select>
-      <button class="primary" onclick="refreshAll()">↻ Refresh</button>
-      <button onclick="triggerIngest()">⬇ Fetch Data</button>
+      <div class="button-container">
+        <button class="primary" onclick="refreshAll()">↻ Refresh</button>
+        <button onclick="triggerIngest()">⬇ Fetch Data</button>
+      </div>
     </div>
   </header>
 
