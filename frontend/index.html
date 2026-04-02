@@ -321,6 +321,13 @@
       /* Center them horizontally */
     }
 
+    .selection-container {
+      display: flex;
+      flex-direction: row;
+      gap: 10px;
+      justify-content: center;
+    }
+
     /* ── Loading / empty states ───────────────────────────────── */
     .loading {
       display: flex;
@@ -358,6 +365,11 @@
         grid-template-columns: 1fr 1fr;
       }
 
+      .selection-container {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
       .button-container {
         flex-direction: column;
         align-items: stretch;
@@ -375,13 +387,15 @@
       <p>Arizona — powered by Open-Meteo</p>
     </div>
     <div class="header-controls">
-      <select id="location-select">
-        <option value="">Loading locations...</option>
-      </select>
-      <select id="days-select">
-        <option value="3">3-day forecast</option>
-        <option value="7" selected>7-day forecast</option>
-      </select>
+      <div class="selection-container">
+        <select id="location-select">
+          <option value="">Loading locations...</option>
+        </select>
+        <select id="days-select">
+          <option value="3">3-day forecast</option>
+          <option value="7" selected>7-day forecast</option>
+        </select>
+      </div>
       <div class="button-container">
         <button class="primary" onclick="refreshAll()">↻ Refresh</button>
         <button onclick="triggerIngest()">⬇ Fetch Data</button>
