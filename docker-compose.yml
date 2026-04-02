@@ -23,7 +23,9 @@ services:
       retries: 5
 
   app:
-    build: .
+    build: 
+      context: .
+      target: development
     container_name: solar_app
     restart: unless-stopped
     depends_on:
@@ -44,8 +46,4 @@ services:
       - .:/app  # live reload during development
 
 volumes:
-<<<<<<< HEAD
   mysql_data:
-=======
-  mysql_data:
->>>>>>> api
