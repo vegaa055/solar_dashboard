@@ -1,0 +1,47 @@
+version: "3.9"
+
+services:
+
+  db:
+    image: mysql:8.3
+    container_name: solar_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: solar_dashboard
+      MYSQL_USER: solar_user
+      MYSQL_PASSWORD: changeme
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql  # auto-runs on first start
+    ports:
+      - "3307:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "solar_user", "-pchangeme"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    container_name: solar_app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: solar_dashboard
+      DB_USER: solar_user
+      DB_PASSWORD: changeme
+      FLASK_ENV: development
+      FLASK_PORT: 5000
+      FETCH_INTERVAL_MINUTES: 60
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app  # live reload during development
+
+volumes:
+  mysql_data:
