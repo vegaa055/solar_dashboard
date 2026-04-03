@@ -14,7 +14,7 @@ A full-stack solar irradiance and weather forecast dashboard for Arizona locatio
 
 ## Quick Start
 
-### Option A — Docker (recommended)
+### Option A — Docker
 
 ```bash
 # 1. Clone and enter the project
@@ -116,5 +116,5 @@ Ideas for next steps:
 - **ML forecasting**: Train a scikit-learn regression on historical GHI + weather features to produce an independent forecast, then compare against Open-Meteo
 - **More locations**: Add `INSERT INTO locations` rows for any lat/lon
 - **Power output estimate**: Add a simple W = GHI × panel_area × efficiency calculation to model actual solar panel output
-- **Kubernetes**: Replace docker-compose with a K8s manifest (relevant to the preferred qualifications!)
+- **Kubernetes**: Replace docker-compose with a K8s manifest 
 - **Alerts**: Email/webhook when forecast shows unusually low irradiance
