@@ -26,7 +26,7 @@ api = Blueprint("api", __name__, url_prefix="/api")
 def _error(msg, code=400):
     return jsonify({"error": msg}), code
 
-
+# Helper to extract and validate location_id from query params
 def _require_location_id():
     lid = request.args.get("location_id", type=int)
     if lid is None:
@@ -37,7 +37,6 @@ def _require_location_id():
 # ------------------------------------------------------------------
 # Locations
 # ------------------------------------------------------------------
-
 @api.route("/locations")
 def list_locations():
     with get_conn() as conn:
@@ -51,6 +50,8 @@ def list_locations():
 # ------------------------------------------------------------------
 # Forecast
 # ------------------------------------------------------------------
+# Note: For simplicity, we return all forecast hours in one call. 
+# In a real app, we might want pagination or separate endpoints for current vs future forecasts.
 
 @api.route("/forecast")
 def get_forecast():
@@ -105,6 +106,11 @@ def get_historical():
     return jsonify(df.to_dict(orient="records"))
 
 
+# ------------------------------------------------------------------
+# Comparison & Trends
+# ------------------------------------------------------------------
+# These endpoints combine forecast and actuals data to provide insights. 
+# They require at least some data in both tables to work properly.
 @api.route("/compare")
 def compare():
     lid, err = _require_location_id()
