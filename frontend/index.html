@@ -50,9 +50,15 @@
       padding: 16px 28px;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+
       flex-wrap: wrap;
       gap: 12px;
+    }
+
+    .header-left {
+      display: flex;
+      flex-direction: column;
+      justify-content: start;
     }
 
     .header-left h1 {
@@ -71,6 +77,9 @@
     .header-controls {
       display: flex;
       align-items: center;
+      /* Adds spacing specifically between the right-side controls */
+      margin-left: auto;
+      gap: 1.5rem;
       gap: 10px;
     }
 
@@ -328,7 +337,7 @@
       justify-content: center;
     }
 
-    .logo{
+    .logo {
       width: 64px;
       height: 64px;
       border-radius: 50%;
@@ -393,12 +402,16 @@
 <body>
 
   <header>
-  <img src="img/av.png"  alt="Logo" class="logo">
+
+    <img src="img/av.png" alt="Logo" class="logo">
+
     <div class="header-left">
 
       <h1>☀ Solar Forecast Dashboard</h1>
       <p>Arizona — powered by Open-Meteo</p>
     </div>
+
+
     <div class="header-controls">
       <div class="selection-container">
         <select id="location-select">
@@ -414,6 +427,9 @@
         <button onclick="triggerIngest()">⬇ Fetch Data</button>
       </div>
     </div>
+
+
+
   </header>
 
   <div id="status-bar">
