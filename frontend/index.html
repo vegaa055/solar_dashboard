@@ -328,6 +328,12 @@
       justify-content: center;
     }
 
+    .logo{
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+    }
+
     /* ── Loading / empty states ───────────────────────────────── */
     .loading {
       display: flex;
@@ -341,8 +347,8 @@
     }
 
     .spinner {
-      width: 24px;
-      height: 24px;
+      width: 64px;
+      height: 64px;
       border: 2px solid var(--border);
       border-top-color: var(--accent);
       border-radius: 50%;
@@ -387,7 +393,9 @@
 <body>
 
   <header>
+  <img src="img/av.png"  alt="Logo" class="logo">
     <div class="header-left">
+
       <h1>☀ Solar Forecast Dashboard</h1>
       <p>Arizona — powered by Open-Meteo</p>
     </div>
