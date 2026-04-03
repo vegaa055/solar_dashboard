@@ -14,7 +14,7 @@ A full-stack solar irradiance and weather forecast dashboard for Arizona locatio
 
 ## Quick Start
 
-### Option A — Docker (recommended)
+### Option A — Docker
 
 ```bash
 # 1. Clone and enter the project
