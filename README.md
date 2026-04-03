@@ -6,6 +6,11 @@ A full-stack solar irradiance and weather forecast dashboard for Arizona locatio
 
 ---
 
+## Hosted Web App URL
+
+Hosted through Hostinger and Dokploy
+https://astralvega.com/
+
 ## Quick Start
 
 ### Option A — Docker (recommended)
@@ -59,16 +64,16 @@ Tests cover the analytics module (daily aggregation, rolling averages, trend ana
 
 ## API Reference
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/locations` | List tracked AZ locations |
-| GET | `/api/forecast?location_id=1&days=7` | Hourly 7-day forecast |
-| GET | `/api/forecast/daily?location_id=1` | Daily aggregated forecast |
-| GET | `/api/historical?location_id=1&days=30` | Past 30 days of actuals |
-| GET | `/api/compare?location_id=1` | Forecast vs actual RMSE/MAE |
-| GET | `/api/trend?location_id=1` | GHI linear trend analysis |
-| POST | `/api/ingest?fetch_type=forecast` | Manually trigger data fetch |
-| GET | `/api/ingest/log` | View ingestion history |
+| Method | Endpoint                                | Description                 |
+| ------ | --------------------------------------- | --------------------------- |
+| GET    | `/api/locations`                        | List tracked AZ locations   |
+| GET    | `/api/forecast?location_id=1&days=7`    | Hourly 7-day forecast       |
+| GET    | `/api/forecast/daily?location_id=1`     | Daily aggregated forecast   |
+| GET    | `/api/historical?location_id=1&days=30` | Past 30 days of actuals     |
+| GET    | `/api/compare?location_id=1`            | Forecast vs actual RMSE/MAE |
+| GET    | `/api/trend?location_id=1`              | GHI linear trend analysis   |
+| POST   | `/api/ingest?fetch_type=forecast`       | Manually trigger data fetch |
+| GET    | `/api/ingest/log`                       | View ingestion history      |
 
 ---
 
