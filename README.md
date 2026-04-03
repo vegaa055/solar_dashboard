@@ -10,7 +10,7 @@ A full-stack solar irradiance and weather forecast dashboard for Arizona locatio
 
 ### Hosted through Hostinger and Dokploy
 
-<a href="https://astralvega.com" linkTarget="_blank">Solar Forecast Dashboard</a>
+<a href="https://astralvega.com" target="_blank">Solar Forecast Dashboard</a>
 
 ## Quick Start
 
