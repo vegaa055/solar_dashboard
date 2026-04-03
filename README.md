@@ -8,7 +8,8 @@ A full-stack solar irradiance and weather forecast dashboard for Arizona locatio
 
 ## Hosted Web App URL
 
-Hosted through Hostinger and Dokploy
+# Hosted through Hostinger and Dokploy
+
 https://astralvega.com/
 
 ## Quick Start
