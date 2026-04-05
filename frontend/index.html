@@ -1093,7 +1093,18 @@
       // add padding between compare chart headers
       const header = container.previousElementSibling;
       if (header) header.style.paddingBottom = "12px";
-      
+      // add padding to labels to prevent overlap
+      const style = document.createElement("style");
+      style.innerHTML = `
+        #compare-chart .chartjs-render-monitor {
+          padding-bottom: 20px;
+          padding-left: 10px;
+          padding-right: 10px;
+        }
+      `;
+      document.head.appendChild(style); 
+
+
     }
 
     // ── Table ──────────────────────────────────────────────────────
