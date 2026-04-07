@@ -1033,6 +1033,29 @@
       });
     }
 
+    // ── Summary table ────────────────────────────────────────────────
+    function renderTable(data) {
+      const rows = data.map(d => `
+      <tr>
+        <td>${d.date}</td>
+        <td>${ghiPill(d.peak_ghi)}</td>
+        <td>${d.avg_ghi.toFixed(0)}</td>
+        <td>${d.avg_temp.toFixed(1)}</td>
+        <td>${d.avg_cloud.toFixed(0)}%</td>
+        <td>${d.total_precip.toFixed(1)}</td>
+      </tr>`).join("");
+      document.getElementById("table-container").innerHTML = `
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Date</th><th>Peak GHI (W/m²)</th><th>Avg GHI (W/m²)</th>
+            <th>Avg Temp (°C)</th><th>Avg Cloud</th><th>Precip (mm)</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+    }
+
     // ── 3-way ML compare chart ─────────────────────────────────────
     function renderMLCompare(data) {
       const container = document.getElementById("compare-container");
