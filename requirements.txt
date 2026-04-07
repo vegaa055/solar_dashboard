@@ -9,6 +9,6 @@ apscheduler==3.10.4
 python-dotenv==1.0.1
 pytest==8.2.2
 pytest-mock==3.14.0
-xgboost=-2.0.3
+xgboost==2.0.3
 scikit-learn==1.5.0
 joblib==1.4.2
