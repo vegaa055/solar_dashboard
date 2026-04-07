@@ -7,19 +7,10 @@
   <meta property="og:title" content="Solar Forecast Dashboard — Arizona" />
   <meta property="og:description"
     content="A dashboard showcasing solar forecasts for Arizona, built with Flask and Open-Meteo data." />
-  <meta property="og:image" content="img/av-cover.png" />
-
-  <!-- meta properties for social media -->
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Solar Forecast Dashboard — Arizona" />  
-  <meta name="twitter:description"
-    content="A dashboard showcasing solar forecasts for Arizona, built with Flask and Open-Meteo data." />
-  <meta name="twitter:image" content="img/av-cover.png" />
-
+  <meta property="og:image" content="https://cdn.midjourney.com/80eb2443-8ff9-478a-9a64-f4eaf184da14/0_1.png" />
   <title>Solar Forecast Dashboard — Arizona</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <style>
-    /* ── Reset & base ─────────────────────────────────────────── */
     *,
     *::before,
     *::after {
@@ -39,7 +30,7 @@
       --accent2: #3b82f6;
       --accent3: #10b981;
       --danger: #ef4444;
-      --glow: rgba(240, 165, 0, 0.15);
+      --purple: #a855f7;
       --radius: 10px;
     }
 
@@ -51,26 +42,26 @@
       min-height: 100vh;
     }
 
-    /* ── Header ───────────────────────────────────────────────── */
+    /* ── Header ── */
     header {
       background: var(--surface);
       border-bottom: 1px solid var(--border);
       padding: 16px 28px;
       display: flex;
       align-items: center;
-
+      justify-content: space-between;
       flex-wrap: wrap;
       gap: 12px;
     }
 
-    .header-left {
+    .header-brand {
       display: flex;
-      flex-direction: column;
-      justify-content: start;
+      align-items: center;
+      gap: 14px;
     }
 
     .header-left h1 {
-      font-size: 1.5rem;
+      font-size: 1.2rem;
       font-weight: 700;
       color: var(--accent);
       letter-spacing: 0.5px;
@@ -85,10 +76,24 @@
     .header-controls {
       display: flex;
       align-items: center;
-      /* Adds spacing specifically between the right-side controls */
-      margin-left: auto;
-      gap: 1.5rem;
       gap: 10px;
+    }
+
+    .button-container {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .selection-container {
+      display: flex;
+      gap: 10px;
+    }
+
+    .logo {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
     }
 
     select,
@@ -119,7 +124,23 @@
       background: #d4920a;
     }
 
-    /* ── Status bar ───────────────────────────────────────────── */
+    button.ml-btn {
+      background: rgba(168, 85, 247, 0.15);
+      border-color: var(--purple);
+      color: var(--purple);
+      font-weight: 600;
+    }
+
+    button.ml-btn:hover {
+      background: rgba(168, 85, 247, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* ── Status bar ── */
     #status-bar {
       background: var(--surface2);
       border-bottom: 1px solid var(--border);
@@ -128,6 +149,7 @@
       color: var(--muted);
       display: flex;
       gap: 20px;
+      flex-wrap: wrap;
     }
 
     #status-bar span {
@@ -155,18 +177,21 @@
       background: var(--danger);
     }
 
-    /* ── Layout ───────────────────────────────────────────────── */
+    .dot.purple {
+      background: var(--purple);
+    }
+
+    /* ── Layout ── */
     main {
       padding: 24px 28px;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      grid-template-rows: auto auto auto;
       gap: 20px;
       max-width: 1400px;
       margin: 0 auto;
     }
 
-    /* ── Cards ────────────────────────────────────────────────── */
+    /* ── Cards ── */
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -189,9 +214,11 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
     }
 
-    .card h2 .badge {
+    .badge {
       font-size: 10px;
       padding: 2px 8px;
       border-radius: 20px;
@@ -201,11 +228,34 @@
       letter-spacing: 0;
       color: var(--accent);
     }
-    .card h2 .badge.blue  { color: var(--accent2); }
-    .card h2 .badge.green { color: var(--accent3); }
 
-    /* ── Stat badges in card headers ── */
-    .header-stats { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .badge.blue {
+      color: var(--accent2);
+    }
+
+    .badge.green {
+      color: var(--accent3);
+    }
+
+    .badge.purple {
+      color: var(--purple);
+      border-color: rgba(168, 85, 247, 0.4);
+      background: rgba(168, 85, 247, 0.1);
+    }
+
+    .badge.warn {
+      color: #fb923c;
+      border-color: rgba(251, 146, 60, 0.4);
+      background: rgba(251, 146, 60, 0.1);
+    }
+
+    .header-stats {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
     .stat-badge {
       font-size: 11px;
       padding: 3px 10px;
@@ -213,15 +263,34 @@
       background: var(--surface2);
       border: 1px solid var(--border);
       color: var(--muted);
-      text-transform: none;
-      letter-spacing: 0;
       font-weight: 500;
     }
-    .stat-badge span { color: var(--text); font-weight: 700; }
-    .stat-badge.rmse span { color: var(--accent); }
-    .stat-badge.mae  span { color: var(--accent2); }
-    .stat-badge.days span { color: var(--accent3); }
-    /* ── KPI row ──────────────────────────────────────────────── */
+
+    .stat-badge span {
+      font-weight: 700;
+    }
+
+    .stat-badge.rmse span {
+      color: var(--accent);
+    }
+
+    .stat-badge.mae span {
+      color: var(--accent2);
+    }
+
+    .stat-badge.skill span {
+      color: var(--accent3);
+    }
+
+    .stat-badge.skill.negative span {
+      color: var(--danger);
+    }
+
+    .stat-badge.days span {
+      color: var(--accent3);
+    }
+
+    /* ── KPI row ── */
     .kpi-grid {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
@@ -261,7 +330,9 @@
       background: var(--danger);
     }
 
-    .kpi.purple::after { background: #a855f7; }
+    .kpi.purple::after {
+      background: var(--purple);
+    }
 
     .kpi-label {
       font-size: 11px;
@@ -284,7 +355,7 @@
       margin-top: 4px;
     }
 
-        /* ── Power estimator card ── */
+    /* ── Power estimator ── */
     .estimator-body {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -292,9 +363,17 @@
       align-items: center;
     }
 
-    .slider-group { display: flex; flex-direction: column; gap: 18px; }
+    .slider-group {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
 
-    .slider-row { display: flex; flex-direction: column; gap: 6px; }
+    .slider-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
 
     .slider-label {
       display: flex;
@@ -304,7 +383,11 @@
       text-transform: uppercase;
       letter-spacing: 0.7px;
     }
-    .slider-label strong { color: var(--text); font-size: 13px; }
+
+    .slider-label strong {
+      color: var(--text);
+      font-size: 13px;
+    }
 
     input[type="range"] {
       -webkit-appearance: none;
@@ -315,21 +398,16 @@
       outline: none;
       cursor: pointer;
     }
+
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
-      width: 16px; height: 16px;
+      width: 16px;
+      height: 16px;
       border-radius: 50%;
       background: var(--accent);
       cursor: pointer;
       border: 2px solid var(--bg);
-      box-shadow: 0 0 4px rgba(240,165,0,0.4);
-    }
-    input[type="range"]::-moz-range-thumb {
-      width: 16px; height: 16px;
-      border-radius: 50%;
-      background: var(--accent);
-      cursor: pointer;
-      border: 2px solid var(--bg);
+      box-shadow: 0 0 4px rgba(240, 165, 0, 0.4);
     }
 
     .estimator-output {
@@ -339,6 +417,7 @@
       padding: 20px 24px;
       text-align: center;
     }
+
     .estimator-output .out-label {
       font-size: 11px;
       color: var(--muted);
@@ -346,17 +425,20 @@
       letter-spacing: 0.8px;
       margin-bottom: 6px;
     }
+
     .estimator-output .out-value {
       font-size: 2.4rem;
       font-weight: 700;
-      color: #a855f7;
+      color: var(--purple);
       line-height: 1;
     }
+
     .estimator-output .out-sub {
       font-size: 11px;
       color: var(--muted);
       margin-top: 4px;
     }
+
     .estimator-output .out-formula {
       font-size: 10px;
       color: var(--muted);
@@ -364,9 +446,87 @@
       padding-top: 12px;
       border-top: 1px solid var(--border);
       font-family: monospace;
-      letter-spacing: 0.3px;
     }
-    /* ── Chart containers ─────────────────────────────────────── */
+
+    /* ── ML model info bar ── */
+    .ml-info-bar {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+      padding: 10px 14px;
+      background: rgba(168, 85, 247, 0.07);
+      border: 1px solid rgba(168, 85, 247, 0.2);
+      border-radius: 8px;
+      font-size: 12px;
+      color: var(--muted);
+      align-items: center;
+    }
+
+    .ml-info-bar .ml-stat {
+      display: flex;
+      gap: 4px;
+    }
+
+    .ml-info-bar .ml-stat strong {
+      color: var(--text);
+    }
+
+    .ml-warn {
+      padding: 8px 14px;
+      background: rgba(251, 146, 60, 0.08);
+      border: 1px solid rgba(251, 146, 60, 0.3);
+      border-radius: 8px;
+      font-size: 12px;
+      color: #fb923c;
+      margin-bottom: 12px;
+    }
+
+    /* ── Feature importance ── */
+    .importance-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .imp-row {
+      display: grid;
+      grid-template-columns: 140px 1fr 48px;
+      gap: 10px;
+      align-items: center;
+      font-size: 12px;
+    }
+
+    .imp-label {
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .imp-bar-wrap {
+      background: var(--surface2);
+      border-radius: 4px;
+      height: 8px;
+      overflow: hidden;
+    }
+
+    .imp-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--purple), rgba(168, 85, 247, 0.4));
+      border-radius: 4px;
+      transition: width 0.6s ease;
+    }
+
+    .imp-val {
+      color: var(--text);
+      font-weight: 600;
+      text-align: right;
+      font-family: monospace;
+      font-size: 11px;
+    }
+
+    /* ── Chart containers ── */
     .chart-wrap {
       position: relative;
       height: 280px;
@@ -376,7 +536,65 @@
       max-width: 100%;
     }
 
-    /* ── Table ────────────────────────────────────────────────── */
+    /* ── Empty / loading states ── */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 200px;
+      color: var(--muted);
+      font-size: 13px;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .spinner {
+      width: 64px;
+      height: 64px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 240px;
+      gap: 10px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .empty-state .empty-icon {
+      font-size: 2rem;
+      opacity: 0.4;
+    }
+
+    .empty-state p {
+      font-size: 13px;
+      max-width: 360px;
+      line-height: 1.6;
+    }
+
+    .empty-days {
+      font-size: 11px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--accent3);
+    }
+
+    /* ── Table ── */
     .data-table {
       width: 100%;
       border-collapse: collapse;
@@ -431,105 +649,42 @@
       color: var(--accent3);
     }
 
-    .button-container {
-      display: flex;
-      flex-direction: row;
-      /* Default side-by-side */
-      gap: 16px;
-      /* Spacing between buttons */
-      justify-content: center;
-      /* Center them horizontally */
-    }
-
-    .selection-container {
-      display: flex;
-      flex-direction: row;
-      gap: 10px;
-      justify-content: center;
-    }
-
-    .logo {
-      width: 64px;
-      height: auto;
-    }
-
-    /* ── Loading / empty states ───────────────────────────────── */
-    .loading {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 200px;
-      color: var(--muted);
-      font-size: 13px;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .spinner {
-      width: 64px;
-      height: 64px;
-      border: 2px solid var(--border);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    /* ── Responsive ───────────────────────────────────────────── */
+    /* ── Responsive ── */
     @media (max-width: 768px) {
       main {
         grid-template-columns: 1fr;
       }
+
       .kpi-grid {
         grid-template-columns: 1fr 1fr;
       }
+
       .estimator-body {
         grid-template-columns: 1fr;
       }
-      .logo {
-        width: 48px;
-        height: auto;
-      }
-      .header-controls {
-        gap: 20px;
-      }
-      .header-left h1 {
-        font-size: 1.2rem;
-      }
 
-      .selection-container {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 15px;
-      }
+      .selection-container,
       .button-container {
         flex-direction: column;
         align-items: stretch;
-        /* Optional: Makes buttons full-width on mobile */
       }
-      .data-table th,
-      .data-table td {
-        padding: 8px;
-        font-size: 10px;
-      }
-      .card{
-        padding: 16px;
+
+      .imp-row {
+        grid-template-columns: 110px 1fr 40px;
       }
     }
   </style>
 </head>
 
 <body>
+
   <header>
-    <img src="img/av-logo.png" alt="Logo" class="logo">
-    <div class="header-left">
-      <h1>Solar Forecast Dashboard</h1>
-      <p>Arizona — powered by Open-Meteo</p>
+    <div class="header-brand">
+      <img src="img/av.png" alt="Logo" class="logo">
+      <div class="header-left">
+        <h1>☀ Solar Forecast Dashboard</h1>
+        <p>Arizona — powered by Open-Meteo</p>
+      </div>
     </div>
     <div class="header-controls">
       <div class="selection-container">
@@ -544,18 +699,21 @@
       <div class="button-container">
         <button class="primary" onclick="refreshAll()">↻ Refresh</button>
         <button onclick="triggerIngest()">⬇ Fetch Data</button>
+        <button class="ml-btn" id="retrain-btn" onclick="retrainModel()">⚙ Train Model</button>
       </div>
     </div>
   </header>
 
   <div id="status-bar">
     <span><span class="dot" id="db-dot"></span> <span id="db-status">Connecting...</span></span>
+    <span><span class="dot purple" id="ml-dot" style="display:none"></span> <span id="ml-status"></span></span>
     <span id="last-updated"></span>
   </div>
 
   <main>
-    <!-- KPI Cards — now 5 wide to include Peak Output -->
-    <div class="kpi-grid" id="kpi-row">
+
+    <!-- KPI row — 5 cards -->
+    <div class="kpi-grid">
       <div class="kpi" id="kpi-peak">
         <div class="kpi-label">Peak GHI Today</div>
         <div class="kpi-value">—</div>
@@ -576,7 +734,6 @@
         <div class="kpi-value">—</div>
         <div class="kpi-sub">%</div>
       </div>
-      <!-- NEW: Peak power output KPI -->
       <div class="kpi purple" id="kpi-power">
         <div class="kpi-label">Est. Peak Output</div>
         <div class="kpi-value">—</div>
@@ -584,97 +741,89 @@
       </div>
     </div>
 
-
-    <!-- NEW: Power Output Estimator card -->
+    <!-- Power estimator -->
     <div class="card full-width">
-      <h2>
-        Solar Power Output Estimator
-        <span class="badge">W = GHI × area × efficiency</span>
-      </h2>
+      <h2>Solar Power Output Estimator <span class="badge">W = GHI × area × efficiency</span></h2>
       <div class="estimator-body">
         <div class="slider-group">
-
           <div class="slider-row">
-            <div class="slider-label">
-              Panel Area
-              <strong id="area-label">50 m²</strong>
-            </div>
-            <input type="range" id="slider-area"
-              min="1" max="500" step="1" value="50"
-              oninput="onSliderChange()">
-            <div class="slider-label" style="font-size:10px;">
-              <span>1 m²</span><span>~4 panels</span><span>500 m²</span>
+            <div class="slider-label">Panel Area <strong id="area-label">50 m²</strong></div>
+            <input type="range" id="slider-area" min="1" max="500" step="1" value="50" oninput="onSliderChange()">
+            <div class="slider-label" style="font-size:10px;"><span>1 m²</span><span>~4 panels</span><span>500 m²</span>
             </div>
           </div>
-
           <div class="slider-row">
-            <div class="slider-label">
-              Panel Efficiency
-              <strong id="eff-label">20%</strong>
-            </div>
-            <input type="range" id="slider-eff"
-              min="5" max="35" step="0.5" value="20"
-              oninput="onSliderChange()">
-            <div class="slider-label" style="font-size:10px;">
-              <span>5% (budget)</span><span>20% (typical)</span><span>35% (premium)</span>
-            </div>
+            <div class="slider-label">Panel Efficiency <strong id="eff-label">20%</strong></div>
+            <input type="range" id="slider-eff" min="5" max="35" step="0.5" value="20" oninput="onSliderChange()">
+            <div class="slider-label" style="font-size:10px;"><span>5% (budget)</span><span>20%
+                (typical)</span><span>35% (premium)</span></div>
           </div>
-
         </div>
-
         <div class="estimator-output">
           <div class="out-label">Current Peak Power Output</div>
           <div class="out-value" id="est-output">—</div>
           <div class="out-sub">kilowatts (kW)</div>
-          <div class="out-formula" id="est-formula">
-            — W/m² × — m² × —% = — kW
-          </div>
+          <div class="out-formula" id="est-formula">— W/m² × — m² × —% = — kW</div>
         </div>
       </div>
     </div>
 
-    <!-- Hourly GHI Chart -->
+    <!-- Hourly GHI + kW output chart -->
     <div class="card full-width">
-      <h2>Hourly Irradiance (GHI) <span class="badge">7-day forecast</span></h2>
-      <div class="chart-wrap">
-        <canvas id="ghi-chart"></canvas>
-      </div>
+      <h2>Hourly Irradiance (GHI) & Estimated Output <span class="badge">forecast</span></h2>
+      <div class="chart-wrap"><canvas id="ghi-chart"></canvas></div>
     </div>
 
-    <!-- Daily Summary Chart -->
+    <!-- Daily bar chart -->
     <div class="card">
       <h2>Daily Peak GHI <span class="badge">forecast</span></h2>
-      <div class="chart-wrap">
-        <canvas id="daily-chart"></canvas>
-      </div>
+      <div class="chart-wrap"><canvas id="daily-chart"></canvas></div>
     </div>
 
-    <!-- Temperature + Cloud Cover -->
+    <!-- Temp + cloud chart -->
     <div class="card">
       <h2>Temperature & Cloud Cover <span class="badge">forecast</span></h2>
-      <div class="chart-wrap">
-        <canvas id="temp-chart"></canvas>
-      </div>
+      <div class="chart-wrap"><canvas id="temp-chart"></canvas></div>
     </div>
 
-
-    <!-- NEW: Forecast vs Actual comparison card -->
+    <!-- 3-way Forecast vs Actual + ML compare -->
     <div class="card full-width">
       <h2>
-        Forecast vs. Actual GHI
+        Forecast Verification — Open-Meteo vs ML vs Observed
         <div class="header-stats">
-          <span class="stat-badge days">Days compared: <span id="compare-days">—</span></span>
-          <span class="stat-badge rmse">RMSE: <span id="compare-rmse">—</span> W/m²</span>
-          <span class="stat-badge mae">MAE: <span id="compare-mae">—</span> W/m²</span>
+          <span class="stat-badge days">Days: <span id="compare-days">—</span></span>
+          <span class="stat-badge rmse">CV RMSE: <span id="compare-rmse">—</span> W/m²</span>
+          <span class="stat-badge mae">Persistence RMSE: <span id="compare-p-rmse">—</span> W/m²</span>
+          <span class="stat-badge skill" id="skill-badge">Skill Score: <span id="compare-skill">—</span></span>
+          <span class="badge purple">XGBoost</span>
           <span class="badge blue">verification</span>
         </div>
       </h2>
+      <div id="ml-info-container"></div>
       <div id="compare-container">
-        <div class="loading"><div class="spinner"></div><span>Loading...</span></div>
+        <div class="loading">
+          <div class="spinner"></div><span>Loading...</span>
+        </div>
       </div>
     </div>
 
-    <!-- Daily Summary Table -->
+    <!-- Feature importance -->
+    <div class="card full-width">
+      <h2>
+        ML Feature Importance
+        <div class="header-stats">
+          <span class="badge purple">XGBoost</span>
+          <span id="trained-at-badge" class="badge" style="display:none"></span>
+        </div>
+      </h2>
+      <div id="importance-container">
+        <div class="loading">
+          <div class="spinner"></div><span>Waiting for model...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary table -->
     <div class="card full-width">
       <h2>7-Day Summary Table</h2>
       <div id="table-container">
@@ -687,18 +836,12 @@
   </main>
 
   <script>
-    // ── Config ─────────────────────────────────────────────────────
     const API = "";
 
-    // ── State ──────────────────────────────────────────────────────
-    let ghiChart   = null;
-    let dailyChart = null;
-    let tempChart  = null;
-    let compareChart = null;
+    let ghiChart = null, dailyChart = null, tempChart = null, compareChart = null;
     let currentLocationId = null;
-    let lastHourlyData = [];   // kept in memory for live slider updates
+    let lastHourlyData = [];
 
-    // ── Chart defaults ─────────────────────────────────────────────
     Chart.defaults.color = "#8b949e";
     Chart.defaults.borderColor = "#30363d";
     Chart.defaults.font.family = "'Segoe UI', system-ui, sans-serif";
@@ -716,6 +859,13 @@
       document.getElementById("db-status").textContent = msg;
     }
 
+    function setMLStatus(msg) {
+      const dot = document.getElementById("ml-dot");
+      const label = document.getElementById("ml-status");
+      dot.style.display = "inline-block";
+      label.textContent = msg;
+    }
+
     function setKPI(id, value, decimals = 0) {
       const el = document.querySelector(`#${id} .kpi-value`);
       if (el) el.textContent = (value !== null && value !== undefined)
@@ -728,38 +878,29 @@
       return `<span class="pill low">${val.toFixed(0)}</span>`;
     }
 
-    // ── Estimator helpers ──────────────────────────────────────────
+    // ── Estimator ──────────────────────────────────────────────────
     function getSliderValues() {
       return {
         area: parseFloat(document.getElementById("slider-area").value),
-        eff:  parseFloat(document.getElementById("slider-eff").value) / 100,
+        eff: parseFloat(document.getElementById("slider-eff").value) / 100,
       };
     }
 
-    function ghiToKw(ghi_wm2, area, eff) {
-      // W = GHI (W/m²) × area (m²) × efficiency → convert W to kW
-      return (ghi_wm2 * area * eff) / 1000;
-    }
+    function ghiToKw(ghi, area, eff) { return (ghi * area * eff) / 1000; }
 
     function onSliderChange() {
       const { area, eff } = getSliderValues();
       document.getElementById("area-label").textContent = `${area} m²`;
-      document.getElementById("eff-label").textContent  = `${(eff * 100).toFixed(1)}%`;
-
-      // Update the formula display using today's peak GHI if available
+      document.getElementById("eff-label").textContent = `${(eff * 100).toFixed(1)}%`;
       const peakGHI = lastHourlyData.length
-        ? Math.max(...lastHourlyData.map(d => d.shortwave_radiation || 0))
-        : null;
-
+        ? Math.max(...lastHourlyData.map(d => d.shortwave_radiation || 0)) : null;
       if (peakGHI !== null) {
         const kw = ghiToKw(peakGHI, area, eff);
-        document.getElementById("est-output").textContent  = kw.toFixed(2);
+        document.getElementById("est-output").textContent = kw.toFixed(2);
         document.getElementById("est-formula").textContent =
-          `${peakGHI.toFixed(0)} W/m² × ${area} m² × ${(eff*100).toFixed(1)}% = ${kw.toFixed(2)} kW`;
+          `${peakGHI.toFixed(0)} W/m² × ${area} m² × ${(eff * 100).toFixed(1)}% = ${kw.toFixed(2)} kW`;
         setKPI("kpi-power", kw, 2);
       }
-
-      // Re-render GHI chart with updated kW dataset
       if (lastHourlyData.length) renderGHIChart(lastHourlyData);
     }
 
@@ -769,10 +910,7 @@
         const locs = await apiFetch("/api/locations");
         const sel = document.getElementById("location-select");
         sel.innerHTML = locs.map(l => `<option value="${l.id}">${l.name}</option>`).join("");
-        if (locs.length > 0) {
-          currentLocationId = locs[0].id;
-          refreshAll();
-        }
+        if (locs.length > 0) { currentLocationId = locs[0].id; refreshAll(); }
         setStatus(true, "Connected");
       } catch (e) {
         setStatus(false, "Cannot reach API — is Flask running?");
@@ -789,17 +927,17 @@
         "Updated " + new Date().toLocaleTimeString();
 
       try {
-        const [hourly, daily, compare] = await Promise.all([
+        const [hourly, daily, mlCompare] = await Promise.all([
           apiFetch(`/api/forecast?location_id=${currentLocationId}&days=${days}`),
           apiFetch(`/api/forecast/daily?location_id=${currentLocationId}`),
-          apiFetch(`/api/compare?location_id=${currentLocationId}`),
+          apiFetch(`/api/ml/compare?location_id=${currentLocationId}`),
         ]);
 
         if (Array.isArray(hourly) && hourly.length > 0) {
           lastHourlyData = hourly;
           renderGHIChart(hourly);
           renderTempChart(hourly);
-          onSliderChange(); // sync estimator with fresh data
+          onSliderChange();
         }
 
         if (Array.isArray(daily) && daily.length > 0) {
@@ -808,97 +946,51 @@
           updateKPIs(daily);
         } else {
           document.getElementById("table-container").innerHTML =
-            `<div class="loading"><span>No data yet. Click "Fetch Data" to pull from Open-Meteo.</span></div>`;
+            `<div class="loading"><span>No data yet. Click "Fetch Data".</span></div>`;
         }
 
-        renderCompare(compare);
+        renderMLCompare(mlCompare);
+        renderFeatureImportance(mlCompare);
 
       } catch (e) {
-        setStatus(false, "Error loading data: " + e.message);
+        setStatus(false, "Error: " + e.message);
       }
     }
 
-    // ── KPI updates ────────────────────────────────────────────────
+    // ── KPIs ───────────────────────────────────────────────────────
     function updateKPIs(daily) {
       const today = daily[0];
       if (today) {
-        setKPI("kpi-peak",  today.peak_ghi, 0);
+        setKPI("kpi-peak", today.peak_ghi, 0);
         setKPI("kpi-cloud", today.avg_cloud, 0);
-        setKPI("kpi-temp",  today.avg_temp, 1);
+        setKPI("kpi-temp", today.avg_temp, 1);
       }
-      const avgGhi = daily.reduce((s, d) => s + (d.avg_ghi || 0), 0) / daily.length;
-      setKPI("kpi-avg", avgGhi, 0);
-      // kpi-power is updated by onSliderChange()
+      setKPI("kpi-avg", daily.reduce((s, d) => s + (d.avg_ghi || 0), 0) / daily.length, 0);
     }
 
-    // ── GHI Chart (now with kW output as second y-axis) ────────────
+    // ── GHI chart ──────────────────────────────────────────────────
     function renderGHIChart(data) {
       const { area, eff } = getSliderValues();
-      const labels  = data.map(d => d.forecast_time.slice(11, 16));
-      const ghi     = data.map(d => d.shortwave_radiation || 0);
-      const rolling = data.map(d => d.ghi_rolling || 0);
-      const kwOut   = data.map(d => ghiToKw(d.shortwave_radiation || 0, area, eff));
-
       const ctx = document.getElementById("ghi-chart").getContext("2d");
       if (ghiChart) ghiChart.destroy();
-
       ghiChart = new Chart(ctx, {
         type: "line",
         data: {
-          labels,
+          labels: data.map(d => d.forecast_time.slice(11, 16)),
           datasets: [
-            {
-              label: "GHI (W/m²)",
-              data: ghi,
-              borderColor: "rgba(240,165,0,0.5)",
-              backgroundColor: "rgba(240,165,0,0.05)",
-              borderWidth: 1,
-              pointRadius: 0,
-              fill: true,
-              tension: 0.3,
-              yAxisID: "y",
-            },
-            {
-              label: "6-hr Rolling Avg (W/m²)",
-              data: rolling,
-              borderColor: "#f0a500",
-              borderWidth: 2.5,
-              pointRadius: 0,
-              fill: false,
-              tension: 0.4,
-              yAxisID: "y",
-            },
-            {
-              label: "Est. Output (kW)",
-              data: kwOut,
-              borderColor: "#a855f7",
-              backgroundColor: "rgba(168,85,247,0.06)",
-              borderWidth: 2,
-              pointRadius: 0,
-              fill: true,
-              tension: 0.3,
-              yAxisID: "y1",
-              borderDash: [4, 3],
-            },
+            { label: "GHI (W/m²)", data: data.map(d => d.shortwave_radiation || 0), borderColor: "rgba(240,165,0,0.5)", backgroundColor: "rgba(240,165,0,0.05)", borderWidth: 1, pointRadius: 0, fill: true, tension: 0.3, yAxisID: "y" },
+            { label: "6-hr Rolling Avg", data: data.map(d => d.ghi_rolling || 0), borderColor: "#f0a500", borderWidth: 2.5, pointRadius: 0, fill: false, tension: 0.4, yAxisID: "y" },
+            { label: "Est. Output (kW)", data: data.map(d => ghiToKw(d.shortwave_radiation || 0, area, eff)), borderColor: "#a855f7", backgroundColor: "rgba(168,85,247,0.06)", borderWidth: 2, pointRadius: 0, fill: true, tension: 0.3, yAxisID: "y1", borderDash: [4, 3] },
           ]
         },
         options: {
-          responsive: true,
-          maintainAspectRatio: false,
+          responsive: true, maintainAspectRatio: false,
           interaction: { mode: "index", intersect: false },
           plugins: { legend: { position: "top" } },
           scales: {
             x: { ticks: { maxTicksLimit: 14, maxRotation: 0 } },
-            y: {
-              title: { display: true, text: "W/m²" },
-              beginAtZero: true,
-            },
-            y1: {
-              position: "right",
-              title: { display: true, text: "kW" },
-              beginAtZero: true,
-              grid: { drawOnChartArea: false },
-            },
+            y: { title: { display: true, text: "W/m²" }, beginAtZero: true },
+            y1: { position: "right", title: { display: true, text: "kW" }, beginAtZero: true, grid: { drawOnChartArea: false } },
           }
         }
       });
@@ -908,29 +1000,13 @@
     function renderDailyChart(data) {
       const ctx = document.getElementById("daily-chart").getContext("2d");
       if (dailyChart) dailyChart.destroy();
-
       dailyChart = new Chart(ctx, {
         type: "bar",
         data: {
           labels: data.map(d => d.date),
-          datasets: [{
-            label: "Peak GHI (W/m²)",
-            data: data.map(d => d.peak_ghi),
-            backgroundColor: data.map(d =>
-              d.peak_ghi > 700 ? "rgba(240,165,0,0.8)" :
-              d.peak_ghi > 400 ? "rgba(59,130,246,0.7)" :
-                                 "rgba(16,185,129,0.6)"
-            ),
-            borderRadius: 5,
-            borderSkipped: false,
-          }]
+          datasets: [{ label: "Peak GHI (W/m²)", data: data.map(d => d.peak_ghi), backgroundColor: data.map(d => d.peak_ghi > 700 ? "rgba(240,165,0,0.8)" : d.peak_ghi > 400 ? "rgba(59,130,246,0.7)" : "rgba(16,185,129,0.6)"), borderRadius: 5, borderSkipped: false }]
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: { y: { beginAtZero: true, title: { display: true, text: "W/m²" } } }
-        }
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, title: { display: true, text: "W/m²" } } } }
       });
     }
 
@@ -939,81 +1015,102 @@
       const sampled = data.filter((_, i) => i % 3 === 0);
       const ctx = document.getElementById("temp-chart").getContext("2d");
       if (tempChart) tempChart.destroy();
-
       tempChart = new Chart(ctx, {
         type: "line",
         data: {
           labels: sampled.map(d => d.forecast_time.slice(5, 13)),
           datasets: [
-            {
-              label: "Temp (°C)",
-              data: sampled.map(d => d.temperature_2m),
-              borderColor: "#ef4444",
-              backgroundColor: "rgba(239,68,68,0.08)",
-              borderWidth: 2, pointRadius: 0, fill: true, tension: 0.4,
-              yAxisID: "y",
-            },
-            {
-              label: "Cloud Cover (%)",
-              data: sampled.map(d => d.cloud_cover),
-              borderColor: "#3b82f6",
-              backgroundColor: "rgba(59,130,246,0.08)",
-              borderWidth: 2, pointRadius: 0, fill: true, tension: 0.4,
-              yAxisID: "y1",
-            },
+            { label: "Temp (°C)", data: sampled.map(d => d.temperature_2m), borderColor: "#ef4444", backgroundColor: "rgba(239,68,68,0.08)", borderWidth: 2, pointRadius: 0, fill: true, tension: 0.4, yAxisID: "y" },
+            { label: "Cloud Cover (%)", data: sampled.map(d => d.cloud_cover), borderColor: "#3b82f6", backgroundColor: "rgba(59,130,246,0.08)", borderWidth: 2, pointRadius: 0, fill: true, tension: 0.4, yAxisID: "y1" },
           ]
         },
         options: {
-          responsive: true,
-          maintainAspectRatio: false,
+          responsive: true, maintainAspectRatio: false,
           interaction: { mode: "index", intersect: false },
           plugins: { legend: { position: "top" } },
-          scales: {
-            y:  { title: { display: true, text: "°C" } },
-            y1: {
-              position: "right",
-              title: { display: true, text: "%" },
-              min: 0, max: 150,
-              grid: { drawOnChartArea: false },
-            },
-          }
+          scales: { y: { title: { display: true, text: "°C" } }, y1: { position: "right", title: { display: true, text: "%" }, min: 0, max: 150, grid: { drawOnChartArea: false } } }
         }
       });
     }
 
-    // ── Forecast vs Actual ─────────────────────────────────────────
-    function renderCompare(data) {
+    // ── 3-way ML compare chart ─────────────────────────────────────
+    function renderMLCompare(data) {
       const container = document.getElementById("compare-container");
+      const infoContainer = document.getElementById("ml-info-container");
 
-      // Update header stat badges
-      const hasDays = data.days_compared && data.days_compared > 0;
-      document.getElementById("compare-days").textContent = hasDays ? data.days_compared : "—";
-      document.getElementById("compare-rmse").textContent = hasDays ? data.rmse_wm2 : "—";
-      document.getElementById("compare-mae").textContent  = hasDays ? data.mae_wm2  : "—";
+      // Update stat badges
+      const hasModel = data.model_status === "trained";
+      const hasDays = data.daily && data.daily.filter(d => d.obs_ghi).length > 0;
+      const skillScore = data.skill_score;
 
-      // Graceful empty state
-      if (!hasDays || data.message) {
-        const daysText = data.days_compared > 0
-          ? `${data.days_compared} day${data.days_compared > 1 ? "s" : ""} of actuals warehoused so far.`
-          : "No overlapping data yet.";
+      document.getElementById("compare-days").textContent = hasDays
+        ? data.daily.filter(d => d.obs_ghi).length : "—";
+      document.getElementById("compare-rmse").textContent = data.cv_rmse_wm2 ?? "—";
+      document.getElementById("compare-p-rmse").textContent = data.persistence_rmse ?? "—";
+      document.getElementById("compare-skill").textContent = skillScore !== null && skillScore !== undefined
+        ? skillScore.toFixed(3) : "—";
 
+      // Color skill score badge
+      const skillBadge = document.getElementById("skill-badge");
+      if (skillScore !== null && skillScore !== undefined) {
+        skillBadge.className = "stat-badge skill" + (skillScore < 0 ? " negative" : "");
+      }
+
+      // ML status in status bar
+      if (hasModel) {
+        const rows = data.rows_used || "?";
+        setMLStatus(`ML model trained on ${rows} rows`);
+      } else {
+        setMLStatus("ML model not trained yet");
+      }
+
+      // Data warning banner
+      if (data.data_warning && data.data_warning_msg) {
+        infoContainer.innerHTML = `<div class="ml-warn">⚠ ${data.data_warning_msg}</div>`;
+      } else {
+        infoContainer.innerHTML = "";
+      }
+
+      // ML info bar
+      if (hasModel && data.trained_at) {
+        const trainedDate = new Date(data.trained_at + "Z").toLocaleString();
+        infoContainer.innerHTML += `
+        <div class="ml-info-bar">
+          <div class="ml-stat">Model: <strong>XGBoost (gradient boosting)</strong></div>
+          <div class="ml-stat">Trained: <strong>${trainedDate}</strong></div>
+          <div class="ml-stat">Samples: <strong>${data.rows_used ?? "—"}</strong></div>
+          <div class="ml-stat">Baseline: <strong>persistence (t−24h)</strong></div>
+        </div>`;
+      }
+
+      // Empty state — no model or no actuals
+      if (!hasModel) {
         container.innerHTML = `
-          <div class="empty-state">
-            <div class="empty-icon">📊</div>
-            <p>Forecast vs. actual comparison will populate automatically as observed data accumulates. Check back in a day or two.</p>
-            <span class="empty-days">${daysText} Need at least 1 overlapping day.</span>
-          </div>`;
+        <div class="empty-state">
+          <div class="empty-icon">🤖</div>
+          <p>No ML model trained yet. Click <strong>⚙ Train Model</strong> to train the XGBoost forecast on your warehoused data.</p>
+        </div>`;
         return;
       }
 
-      // We have real data — build the chart
+      if (!hasDays) {
+        container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">📊</div>
+          <p>Model is trained. The 3-way comparison chart will populate as observed actuals accumulate — check back in a day or two.</p>
+          <span class="empty-days">Need at least 1 day of overlapping observed data.</span>
+        </div>`;
+        return;
+      }
+
+      // Render the 3-way chart
       container.innerHTML = `<div class="chart-wrap"><canvas id="compare-chart"></canvas></div>`;
 
       const daily = data.daily || [];
-      const labels   = daily.map(d => String(d.day));
-      const forecast = daily.map(d => parseFloat(d.fcst_ghi || 0).toFixed(2));
-      const actual   = daily.map(d => parseFloat(d.obs_ghi  || 0).toFixed(2));
-      const errors   = daily.map(d => parseFloat(d.error    || 0).toFixed(2));
+      const labels = daily.map(d => String(d.day));
+      const omFcst = daily.map(d => d.openmeteo_ghi ? parseFloat(d.openmeteo_ghi).toFixed(1) : null);
+      const mlFcst = daily.map(d => d.ml_ghi ? parseFloat(d.ml_ghi).toFixed(1) : null);
+      const observed = daily.map(d => d.obs_ghi ? parseFloat(d.obs_ghi).toFixed(1) : null);
 
       const ctx = document.getElementById("compare-chart").getContext("2d");
       if (compareChart) compareChart.destroy();
@@ -1024,142 +1121,160 @@
           labels,
           datasets: [
             {
-              label: "Forecast GHI (W/m²)",
-              data: forecast,
+              label: "Open-Meteo Forecast (W/m²)",
+              data: omFcst,
               borderColor: "#f0a500",
-              backgroundColor: "rgba(240,165,0,0.08)",
-              borderWidth: 2.5,
-              pointRadius: 4,
-              pointHoverRadius: 6,
-              fill: true,
-              tension: 0.3,
-              yAxisID: "y",
+              backgroundColor: "rgba(240,165,0,0.06)",
+              borderWidth: 2.5, pointRadius: 5, pointHoverRadius: 7,
+              fill: false, tension: 0.3,
+            },
+            {
+              label: "XGBoost ML Forecast (W/m²)",
+              data: mlFcst,
+              borderColor: "#a855f7",
+              backgroundColor: "rgba(168,85,247,0.06)",
+              borderWidth: 2.5, pointRadius: 5, pointHoverRadius: 7,
+              fill: false, tension: 0.3,
+              borderDash: [6, 3],
             },
             {
               label: "Observed GHI (W/m²)",
-              data: actual,
-              borderColor: "#3b82f6",
-              backgroundColor: "rgba(59,130,246,0.08)",
-              borderWidth: 2.5,
-              pointRadius: 4,
-              pointHoverRadius: 6,
-              fill: true,
-              tension: 0.3,
-              yAxisID: "y",
-            },
-            {
-              label: "Error (Forecast − Actual)",
-              data: errors,
-              borderColor: "rgba(239,68,68,0.7)",
-              backgroundColor: "rgba(239,68,68,0.07)",
-              borderWidth: 1.5,
-              pointRadius: 3,
-              fill: true,
-              tension: 0.2,
-              borderDash: [5, 4],
-              yAxisID: "y1",
+              data: observed,
+              borderColor: "#10b981",
+              backgroundColor: "rgba(16,185,129,0.08)",
+              borderWidth: 3, pointRadius: 6, pointHoverRadius: 8,
+              fill: true, tension: 0.3,
             },
           ]
         },
         options: {
-          responsive: true,
-          maintainAspectRatio: false,
+          responsive: true, maintainAspectRatio: false,
           interaction: { mode: "index", intersect: false },
           plugins: {
             legend: { position: "top" },
             tooltip: {
               callbacks: {
                 afterBody: (items) => {
-                  const err = errors[items[0].dataIndex];
-                  return [`Bias: ${parseFloat(err) > 0 ? "over-forecast" : "under-forecast"} by ${Math.abs(err)} W/m²`];
+                  const idx = items[0].dataIndex;
+                  const om = parseFloat(omFcst[idx]);
+                  const ml = parseFloat(mlFcst[idx]);
+                  const obs = parseFloat(observed[idx]);
+                  const lines = [];
+                  if (!isNaN(om) && !isNaN(obs)) {
+                    const err = (om - obs).toFixed(1);
+                    lines.push(`Open-Meteo error: ${err > 0 ? "+" : ""}${err} W/m²`);
+                  }
+                  if (!isNaN(ml) && !isNaN(obs)) {
+                    const err = (ml - obs).toFixed(1);
+                    lines.push(`ML error: ${err > 0 ? "+" : ""}${err} W/m²`);
+                  }
+                  return lines;
                 }
               }
             }
           },
           scales: {
-            y: {
-              title: { display: true, text: "Avg Daily GHI (W/m²)" },
-              beginAtZero: true,
-            },
-            y1: {
-              position: "right",
-              title: { display: true, text: "Error (W/m²)" },
-              grid: { drawOnChartArea: false },
-            },
+            y: { title: { display: true, text: "Avg Daily GHI (W/m²)" }, beginAtZero: true },
+            x: { ticks: { maxRotation: 0 } },
           }
         }
       });
+    }
 
-      // add padding between compare chart headers
-      const header = container.previousElementSibling;
-      if (header) header.style.paddingBottom = "12px";
-      // add padding to labels to prevent overlap
-      const style = document.createElement("style");
-      style.innerHTML = `
-        #compare-chart .chartjs-render-monitor {
-          padding-bottom: 20px;
-          padding-left: 10px;
-          padding-right: 10px;
+    // ── Feature importance ─────────────────────────────────────────
+    function renderFeatureImportance(data) {
+      const container = document.getElementById("importance-container");
+      const imp = data.feature_importance;
+
+      if (!imp || Object.keys(imp).length === 0) {
+        container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">📉</div>
+          <p>Feature importance will appear here after the model is trained.</p>
+        </div>`;
+        return;
+      }
+
+      // Update trained-at badge
+      if (data.trained_at) {
+        const badge = document.getElementById("trained-at-badge");
+        badge.style.display = "inline-block";
+        badge.textContent = "Last trained: " + new Date(data.trained_at + "Z").toLocaleDateString();
+      }
+
+      const labels = {
+        "sin_hour": "Hour (sin)", "cos_hour": "Hour (cos)",
+        "sin_doy": "Day of Year (sin)", "cos_doy": "Day of Year (cos)",
+        "sin_month": "Month (sin)", "cos_month": "Month (cos)",
+        "hour": "Hour of Day", "month": "Month", "day_of_year": "Day of Year",
+        "cloud_cover": "Cloud Cover (%)", "temperature_2m": "Temperature (°C)",
+        "wind_speed_10m": "Wind Speed (km/h)", "is_day": "Is Daytime",
+      };
+
+      const maxVal = Math.max(...Object.values(imp));
+      const rows = Object.entries(imp).map(([key, val]) => {
+        const pct = ((val / maxVal) * 100).toFixed(1);
+        return `
+        <div class="imp-row">
+          <div class="imp-label" title="${labels[key] || key}">${labels[key] || key}</div>
+          <div class="imp-bar-wrap">
+            <div class="imp-bar" style="width: ${pct}%"></div>
+          </div>
+          <div class="imp-val">${(val * 100).toFixed(1)}%</div>
+        </div>`;
+      }).join("");
+
+      container.innerHTML = `<div class="importance-list">${rows}</div>`;
+    }
+
+    // ── Retrain model ──────────────────────────────────────────────
+    async function retrainModel() {
+      const btn = document.getElementById("retrain-btn");
+      btn.disabled = true;
+      btn.textContent = "Training...";
+      setMLStatus("Training XGBoost model...");
+      try {
+        const result = await fetch(
+          `${API}/api/ml/train?location_id=${currentLocationId}`,
+          { method: "POST" }
+        ).then(r => r.json());
+
+        if (result.status === "ok") {
+          setMLStatus(`Model trained — skill score: ${result.skill_score ?? "n/a"}`);
+          await refreshAll();
+        } else {
+          setMLStatus("Training failed: " + (result.message || result.status));
         }
-      `;
-      document.head.appendChild(style); 
-
-
+      } catch (e) {
+        setMLStatus("Training error: " + e.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "⚙ Train Model";
+      }
     }
 
-    // ── Table ──────────────────────────────────────────────────────
-    function renderTable(data) {
-      const rows = data.map(d => `
-        <tr>
-          <td>${d.date}</td>
-          <td>${ghiPill(d.peak_ghi)}</td>
-          <td>${d.avg_ghi.toFixed(0)}</td>
-          <td>${d.avg_temp.toFixed(1)}</td>
-          <td>${d.avg_cloud.toFixed(0)}%</td>
-          <td>${d.total_precip.toFixed(1)}</td>
-        </tr>`).join("");
-
-      document.getElementById("table-container").innerHTML = `
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Peak GHI (W/m²)</th>
-              <th>Avg GHI (W/m²)</th>
-              <th>Avg Temp (°C)</th>
-              <th>Avg Cloud</th>
-              <th>Precip (mm)</th>
-            </tr>
-          </thead>
-          <tbody>${rows}</tbody>
-        </table>`;
-    }
-
-    // ── Manual ingest trigger ──────────────────────────────────────
+    // ── Manual ingest ──────────────────────────────────────────────
     async function triggerIngest() {
       const btn = event.target;
-      btn.disabled = true;
-      btn.textContent = "Fetching...";
+      btn.disabled = true; btn.textContent = "Fetching...";
       setStatus(true, "Fetching from Open-Meteo...");
       try {
-        await fetch(API + "/api/ingest?fetch_type=forecast",   { method: "POST" });
+        await fetch(API + "/api/ingest?fetch_type=forecast", { method: "POST" });
         await fetch(API + "/api/ingest?fetch_type=historical", { method: "POST" });
         setStatus(true, "Fetch complete");
         await refreshAll();
       } catch (e) {
         setStatus(false, "Fetch failed: " + e.message);
       } finally {
-        btn.disabled = false;
-        btn.textContent = "⬇ Fetch Data";
+        btn.disabled = false; btn.textContent = "⬇ Fetch Data";
       }
     }
 
-    // ── Event listeners ────────────────────────────────────────────
+    // ── Events + init ──────────────────────────────────────────────
     document.getElementById("location-select").addEventListener("change", refreshAll);
     document.getElementById("days-select").addEventListener("change", refreshAll);
-
-    // ── Init ──────────────────────────────────────────────────────
     loadLocations();
   </script>
 </body>
+
 </html>

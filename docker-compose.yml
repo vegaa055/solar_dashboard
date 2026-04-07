@@ -13,17 +13,17 @@ services:
       MYSQL_PASSWORD: changeme
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql  # auto-runs on first start
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql # auto-runs on first start
     ports:
       - "3307:3306"
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "solar_user", "-pchangeme"]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "solar_user", "-pchangeme" ]
       interval: 10s
       timeout: 5s
       retries: 5
 
   app:
-    build: 
+    build:
       context: .
       target: development
     container_name: solar_app
@@ -43,7 +43,9 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - .:/app  # live reload during development
+      - .:/app # live reload during development
+      - ./models:/app/models # persist trained models
 
 volumes:
   mysql_data:
+  ml_models:

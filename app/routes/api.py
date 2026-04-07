@@ -155,7 +155,8 @@ def trigger_ingest():
     results = ingestion.fetch_all_locations(fetch_type)
     return jsonify({"fetch_type": fetch_type, "results": results})
 
-
+# Ingestion log endpoint to view recent ingestion attempts and their status. 
+# Useful for debugging and monitoring.
 @api.route("/ingest/log")
 def ingest_log():
     limit = request.args.get("limit", default=20, type=int)

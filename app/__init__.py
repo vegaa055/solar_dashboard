@@ -6,6 +6,7 @@ Creates the app, registers blueprints, and starts the APScheduler background job
 """
 import os
 import logging
+import threading
 from flask import Flask, send_from_directory
 from flask_cors import CORS
 from apscheduler.schedulers.background import BackgroundScheduler

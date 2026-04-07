@@ -2,6 +2,7 @@
 FROM python:3.12-alpine AS base
 WORKDIR /app
 RUN apk add --no-cache gcc musl-dev libffi-dev
+RUN mkdir -p /app/models
 
 # ── development: hot-reload, debug mode ──────────────────────────────────────
 FROM base AS development
