@@ -36,8 +36,12 @@ def get_conn():
     return _gc()
 
 # Where trained models are stored inside the container
-MODEL_DIR = Path(os.getenv("MODEL_DIR", "/app/models"))
-MODEL_DIR.mkdir(parents=True, exist_ok=True)
+MODEL_DIR = Path(os.getenv("MODEL_DIR", "./models"))
+
+
+def _ensure_model_dir():
+    """Create model directory on first use — not at import time (breaks CI)."""
+    MODEL_DIR.mkdir(parents=True, exist_ok=True)
 
 # Minimum rows needed to attempt training
 MIN_TRAIN_ROWS = 48   # 2 days of hourly data
@@ -217,6 +221,7 @@ def train(location_id: int) -> dict:
     importances = dict(sorted(importances.items(), key=lambda x: x[1], reverse=True))
 
     # ── Persist model + metadata ──
+    _ensure_model_dir()
     joblib.dump(xgb, _model_path(location_id))
 
     meta = {
