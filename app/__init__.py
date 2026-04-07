@@ -29,6 +29,9 @@ def create_app():
     from app.routes.api import api
     app.register_blueprint(api)
 
+    from app.routes.ml_api import ml_api
+    app.register_blueprint(ml_api)
+
     # Serve the frontend dashboard at /
     @app.route("/")
     def index():
